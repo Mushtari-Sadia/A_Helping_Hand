@@ -29,11 +29,10 @@ body {
   }
 
   .content-section {
-    background: #fafafa;
+    background: #ffffff;
     padding: 10px 20px;
-    position: fixed;
-    right: 0px;
-    border-left: 1px solid #dddddd;
+    border: 1px solid #dddddd;
+    border-radius: 3px;
     margin-bottom: 20px;
   }
 
