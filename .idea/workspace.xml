@@ -67,8 +67,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1585744903655</updated>
+<<<<<<< HEAD
       <workItem from="1585745071606" duration="11405000" />
       <workItem from="1585766485601" duration="7278000" />
+=======
+      <workItem from="1585745071606" duration="11201000" />
+>>>>>>> master
     </task>
     <servers />
   </component>
