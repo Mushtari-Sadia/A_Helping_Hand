@@ -34,8 +34,6 @@ INSTALLED_APPS = [
     'home.apps.HomeConfig',
     'customers.apps.UsersConfig',
     'home_customer.apps.HomeConsumerConfig',
-    'users.apps.UsersConfig',
-    'home_consumer.apps.HomeConsumerConfig',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',

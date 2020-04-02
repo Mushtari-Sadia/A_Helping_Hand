@@ -17,7 +17,6 @@ from django.contrib import admin
 from django.urls import path,include
 from customers import views as customer_views
 from home import views as home_views
-from users import views as user_views
 
 
 
@@ -26,7 +25,5 @@ urlpatterns = [
     path('register/',home_views.register, name = 'register'),
     path('register_customer/',customer_views.register, name = 'register_as_customer'),
     path('', include('home_customer.urls')),
-    path('register/',user_views.register, name = 'register'),
-    path('', include('home_consumer.urls')),
 
 ]
