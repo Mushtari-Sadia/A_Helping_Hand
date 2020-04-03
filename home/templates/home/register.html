@@ -1,8 +1,10 @@
 {% extends "customers/base.html" %}
 {% block content %}
     <div style="text-align: center;">
-        <button type="button" class="btn btn-outline-secondary btn-lg btn-block">Register As Worker</button>
-        <button type="button" class="btn btn-outline-secondary btn-lg btn-block">Register As Customer</button>
+        <button type="submit" class="btn btn-outline-secondary btn-lg btn-block">Register As Worker</button>
+        <form action="{% url 'register_as_customer' %}" method='GET'>
+            <button type="submit" class="btn btn-outline-secondary btn-lg btn-block">Register As Customer</button>
+        </form>
     </div>
 
 {% endblock content %}
