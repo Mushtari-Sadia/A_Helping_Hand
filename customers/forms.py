@@ -66,7 +66,9 @@ for i in AREA_LIST_ALL:
 
 
 class CustomerRegisterForm(UserCreationForm):
-    email = forms.EmailField()
+    phone_number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+                                 max_length=11)
+    email = forms.EmailField(required=False)
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
                                  max_length=32)
     last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
@@ -81,10 +83,10 @@ class CustomerRegisterForm(UserCreationForm):
     )
     area_field.label = "Address"
     address = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'House No.,Road No.,Sector/Block etc...'}),
-                                 max_length=45)
+                                 max_length=45,required=False)
     address.label = ""
-
+    phone_number.label="Phone Number"
 
     class Meta:
-        model = User
-        fields = ['username','first_name','last_name','email', 'password1', 'password2','birth_year','area_field','address']
+         model = User
+         fields = ['phone_number','first_name','last_name','email', 'password1', 'password2','birth_year','area_field','address']
