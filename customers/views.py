@@ -18,13 +18,21 @@ def register(request):
             thana_name = form.cleaned_data.get('area_field')
             address = form.cleaned_data.get('address')
 
-            conn.cursor().execute(
-                  "INSERT INTO Customer(phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
-                  + " VALUES ('" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
-                  address + "'," + "TO_DATE('" + str(date_of_birth) + "', 'YYYY-MM-DD'));")
+            count = 0
+            for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'") :
+                    count +=1
+            if count == 0 :
+                conn.cursor().execute(
+                    "INSERT INTO Customer(phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
+                    + " VALUES ('" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
+                    address + "'," + "TO_DATE('" + str(date_of_birth) + "', 'YYYY-MM-DD'))")
 
-            messages.success(request, f'Account created for {first_name + " " + last_name}!')
-            return redirect('home_customer-home')
+                messages.success(request, f'Account created for {first_name + " " + last_name}!')
+                return redirect('home_customer-home')
+            else :
+                messages.warning(request,"A user with this phone number already exists!")
+                return render(request, 'customers/reg_as_customer.html', {'form': form})
+
     else:
         form = CustomerRegisterForm()
     return render(request, 'customers/reg_as_customer.html', {'form' : form})

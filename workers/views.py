@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import WorkerRegisterForm
+from customers.forms import WorkerRegisterForm
 from django.contrib import messages
 # Create your views here.
 

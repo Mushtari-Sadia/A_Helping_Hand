@@ -28,6 +28,7 @@ urlpatterns = [
     path('register/customer/',customer_views.register, name = 'register_as_customer'),
     path('register/worker/',worker_views.register, name = 'register_as_worker'),
     path('', include('home_customer.urls')),
-    path('login/', auth_views.LoginView.as_view(template_name='home/login.html'),name = 'login'),
+    path('login/', home_views.login,name = 'login'),
+    path('logout/', home_views.logout,name = 'logout'),
 
 ]
