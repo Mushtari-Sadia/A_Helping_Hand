@@ -70,7 +70,6 @@ for i in AREA_LIST_ALL:
 class CustomerRegisterForm(UserCreationForm):
     phone_number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
                                  max_length=11)
-    email = forms.EmailField(required=False)
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
                                  max_length=32)
     last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
@@ -91,7 +90,7 @@ class CustomerRegisterForm(UserCreationForm):
 
     class Meta:
          model = User
-         fields = ['phone_number','first_name','last_name','email', 'password1', 'password2','birth_year','area_field','address']
+         fields = ['phone_number','first_name','last_name', 'password1', 'password2','birth_year','area_field','address']
 
 
 JOB_LIST = [
@@ -111,7 +110,6 @@ class WorkerRegisterForm(CustomerRegisterForm):
     phone_number = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
         max_length=11)
-    email = forms.EmailField()
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
                                  max_length=32)
     last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
@@ -138,7 +136,7 @@ class WorkerRegisterForm(CustomerRegisterForm):
 
     class Meta:
         model = User
-        fields = ['phone_number','first_name','last_name','email', 'password1', 'password2','birth_year','area_field','address','job_field']
+        fields = ['phone_number','first_name','last_name', 'password1', 'password2','birth_year','area_field','address','job_field']
 
 
 class LoginForm(forms.Form):
