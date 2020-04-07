@@ -3,7 +3,7 @@ from customers.forms import WorkerRegisterForm
 from django.contrib import messages
 # Create your views here.
 
-# TODO 2 : complete worker registration form same as customer registration form, check customers/views.py
+# TODO FARDIN 2 : complete worker registration form same as customer registration form, check customers/views.py
 def register(request):
     if request.method == 'POST':
         form = WorkerRegisterForm(request.POST)

@@ -32,6 +32,7 @@ def login(request):
                 return render(request, 'home/login.html', {'form': form})
             else :
                 messages.success(request, "Login Successful!")
+                #TODO SADIA 1 : DEFINITION IS HERE ONLY.SO IF NOT LOGGED IN, GIVES KEYERROR. FIX THIS
                 request.session['loggedIn'] = True
                 request.session['user_id'] = customer_id
                 return render(request,'home_customer/home.html',{'loggedIn' : request.session['loggedIn']})
