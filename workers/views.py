@@ -5,9 +5,12 @@ from django.contrib import messages
 
 # TODO FARDIN 2 : complete worker registration form same as customer registration form, check customers/views.py
 def register(request):
+    if 'loggedIn' in request.session and request.session['loggedIn'] == True:
+            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn']})
     if request.method == 'POST':
         form = WorkerRegisterForm(request.POST)
         if form.is_valid():
+            
             return redirect('home_worker-home')
     else:
         form = WorkerRegisterForm()
