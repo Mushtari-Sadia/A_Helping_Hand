@@ -10,7 +10,7 @@ def register(request):
     if request.method == 'POST':
         form = WorkerRegisterForm(request.POST)
         if form.is_valid():
-            
+
             return redirect('home_worker-home')
     else:
         form = WorkerRegisterForm()
