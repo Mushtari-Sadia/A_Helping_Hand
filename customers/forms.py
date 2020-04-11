@@ -146,3 +146,21 @@ class LoginForm(forms.Form):
     phone_number.label = "Phone Number"
     password = forms.CharField(max_length=32, widget=forms.PasswordInput)
     password.label = "Password"
+
+
+class ElectricianRegistrationForm(forms.Form):
+    license_info = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your license information'}),
+        max_length=42,required=False)
+    license_info.label = "License Information (Optional)"
+
+    yr_of_experience = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+        max_value=60,required=False
+    )
+    yr_of_experience.label = "Years of Experience (Optional)"
+
+    qualification = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Educational qualifications'}),
+        max_length=100,required=False)
+    qualification.label = "Educational Qualification (Optional)"
