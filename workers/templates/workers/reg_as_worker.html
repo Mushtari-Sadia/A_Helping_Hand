@@ -9,9 +9,11 @@
                 {{  form | crispy }}
             </fieldset>
             <div class="form-group">
-
-                <button class="btn btn-outline-info" type="submit">Next Step</button>
-
+                {% if regSecondPage %}
+                    <button class="btn btn-outline-info" type="submit">Sign Up</button>
+                {% else %}
+                    <button class="btn btn-outline-info" type="submit">Next Step</button>
+                {% endif %}
             </div>
         </form>
         <div class="border-top pt-3">

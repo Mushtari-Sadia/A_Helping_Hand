@@ -164,3 +164,10 @@ class ElectricianRegistrationForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Educational qualifications'}),
         max_length=100,required=False)
     qualification.label = "Educational Qualification (Optional)"
+
+
+class HomeCleanerRegistrationForm(forms.Form):
+    NID_number = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your National Id No.'}),
+        max_length=42)
+    NID_number.label = "NID No."

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from customers.forms import WorkerRegisterForm,ElectricianRegistrationForm
+from customers.forms import WorkerRegisterForm,ElectricianRegistrationForm,HomeCleanerRegistrationForm
 from django.contrib import messages
 from django.db import connection as conn
 # Create your views here.
@@ -67,8 +67,8 @@ def register(request):
                     # template_name = "workers/reg_as_worker_" + str(job_field) + ".html"
                     # return render(request,template_name,{'form' : forms[job_field]})
 
-                    next_page_url = "reg_as_worker_" + str(job_field)
-                    return redirect('register_as_worker_1')
+                    next_page_url = 'register_as_worker_' + str(job_field)
+                    return redirect(next_page_url)
 
             else:
                 messages.warning(request, "A user with this phone number already exists!")
@@ -89,7 +89,6 @@ def registerElectrician(request):
                 license_info = form.cleaned_data.get('license_info')
                 yr_of_experience = form.cleaned_data.get('yr_of_experience')
                 qualification = form.cleaned_data.get('qualification')
-                print("@@@@@@@@@@@first name is " + first_name)
 
                 worker_id = request.session['user_id']
 
@@ -97,10 +96,44 @@ def registerElectrician(request):
                     "INSERT INTO ELECTRICIAN(WORKER_ID,LICENSE_INFO,YEARS_OF_EXPERIENCE,QUALIFICATION)"
                     + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + str(yr_of_experience) + "','" + qualification + "')")
 
-                messages.success(request, f'Account created for {first_name + " " + last_name}!')
+                name = ""
+                for row in conn.cursor().execute(
+                        "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(worker_id) + "'"):
+                    name = row[0]
+
+                messages.success(request, f'Account created for {name}!')
                 return redirect('home_worker-home')
         else :
             form = ElectricianRegistrationForm()
-        return render(request,'workers/reg_as_worker_1.html',{'form' : form})
+        return render(request,'workers/reg_as_worker.html',{'form' : form, 'regSecondPage' : request.session['regDone1']})
     else :
+        return redirect('register_as_worker')
+
+
+def registerHomeCleaner(request) :
+    # if user has completed first part of registration
+    if 'regDone1' in request.session and request.session['regDone1'] == True:
+        if request.method == 'POST':
+            form = HomeCleanerRegistrationForm(request.POST)
+            if form.is_valid():
+                NID_number = form.cleaned_data.get('NID_number')
+
+                worker_id = request.session['user_id']
+
+                conn.cursor().execute(
+                    "INSERT INTO HOME_CLEANER(WORKER_ID,NID )"
+                    + " VALUES ('" + str(worker_id) + "','"+ NID_number + "')")
+
+                name = ""
+                for row in conn.cursor().execute(
+                        "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'"):
+                    name = row[0]
+
+                messages.success(request, f'Account created for {name}!')
+                return redirect('home_worker-home')
+        else:
+            form = HomeCleanerRegistrationForm()
+        return render(request, 'workers/reg_as_worker.html', {'form': form, 'regSecondPage' : request.session['regDone1']})
+    else:
         return redirect('register_as_worker')
