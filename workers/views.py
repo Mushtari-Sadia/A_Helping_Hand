@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
-from customers.forms import WorkerRegisterForm,ElectricianRegistrationForm,HomeCleanerRegistrationForm
+from customers.forms import *
 from django.contrib import messages
 from django.db import connection as conn
+
 # Create your views here.
 
 
@@ -25,11 +26,13 @@ thana_name = ""
 address = ""
 
 
-
 # TODO SADIA 2 : complete worker registration form
 def register(request):
+    # If current user goes to register, any registration done by him before will be deleted
+    if 'regDone1' in request.session and request.session['regDone1'] == True:
+        request.session['regDone1'] = False
     if 'loggedIn' in request.session and request.session['loggedIn'] == True:
-            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn']})
+        return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn']})
     if request.method == 'POST':
         form = WorkerRegisterForm(request.POST)
         if form.is_valid():
@@ -76,14 +79,13 @@ def register(request):
 
     else:
         form = WorkerRegisterForm()
-    return render(request, 'workers/reg_as_worker.html', {'form' : form})
-
+    return render(request, 'workers/reg_as_worker.html', {'form': form})
 
 
 def registerElectrician(request):
-    #if user has completed first part of registration
-    if 'regDone1' in request.session and request.session['regDone1'] == True :
-        if request.method == 'POST' :
+    # if user has completed first part of registration
+    if 'regDone1' in request.session and request.session['regDone1'] == True:
+        if request.method == 'POST':
             form = ElectricianRegistrationForm(request.POST)
             if form.is_valid():
                 license_info = form.cleaned_data.get('license_info')
@@ -94,23 +96,27 @@ def registerElectrician(request):
 
                 conn.cursor().execute(
                     "INSERT INTO ELECTRICIAN(WORKER_ID,LICENSE_INFO,YEARS_OF_EXPERIENCE,QUALIFICATION)"
-                    + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + str(yr_of_experience) + "','" + qualification + "')")
+                    + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + str(
+                        yr_of_experience) + "','" + qualification + "')")
 
                 name = ""
                 for row in conn.cursor().execute(
-                        "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(worker_id) + "'"):
+                        "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'"):
                     name = row[0]
 
                 messages.success(request, f'Account created for {name}!')
+                request.session['regDone1'] = False
                 return redirect('home_worker-home')
-        else :
+        else:
             form = ElectricianRegistrationForm()
-        return render(request,'workers/reg_as_worker.html',{'form' : form, 'regSecondPage' : request.session['regDone1']})
-    else :
+        return render(request, 'workers/reg_as_worker.html',
+                      {'form': form, 'regSecondPage': request.session['regDone1']})
+    else:
         return redirect('register_as_worker')
 
 
-def registerHomeCleaner(request) :
+def registerHomeCleaner(request):
     # if user has completed first part of registration
     if 'regDone1' in request.session and request.session['regDone1'] == True:
         if request.method == 'POST':
@@ -122,7 +128,7 @@ def registerHomeCleaner(request) :
 
                 conn.cursor().execute(
                     "INSERT INTO HOME_CLEANER(WORKER_ID,NID )"
-                    + " VALUES ('" + str(worker_id) + "','"+ NID_number + "')")
+                    + " VALUES ('" + str(worker_id) + "','" + NID_number + "')")
 
                 name = ""
                 for row in conn.cursor().execute(
@@ -131,9 +137,43 @@ def registerHomeCleaner(request) :
                     name = row[0]
 
                 messages.success(request, f'Account created for {name}!')
+                request.session['regDone1'] = False
                 return redirect('home_worker-home')
         else:
             form = HomeCleanerRegistrationForm()
-        return render(request, 'workers/reg_as_worker.html', {'form': form, 'regSecondPage' : request.session['regDone1']})
+        return render(request, 'workers/reg_as_worker.html',
+                      {'form': form, 'regSecondPage': request.session['regDone1']})
+    else:
+        return redirect('register_as_worker')
+
+
+def registerPestControlService(request):
+    # if user has completed first part of registration
+    if 'regDone1' in request.session and request.session['regDone1'] == True:
+        if request.method == 'POST':
+            form = PestControlServiceRegistrationForm(request.POST)
+            if form.is_valid():
+                license_info = form.cleaned_data.get('license_info')
+                chemical_info = form.cleaned_data.get('chemical_info')
+
+                worker_id = request.session['user_id']
+
+                conn.cursor().execute(
+                    "INSERT INTO PEST_CONTROL(WORKER_ID,LICENSE_INFO,CHEMICAL_INFO )"
+                    + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + chemical_info + "')")
+
+                name = ""
+                for row in conn.cursor().execute(
+                        "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'"):
+                    name = row[0]
+
+                messages.success(request, f'Account created for {name}!')
+                request.session['regDone1'] = False
+                return redirect('home_worker-home')
+        else:
+            form = PestControlServiceRegistrationForm()
+        return render(request, 'workers/reg_as_worker.html',
+                      {'form': form, 'regSecondPage': request.session['regDone1']})
     else:
         return redirect('register_as_worker')

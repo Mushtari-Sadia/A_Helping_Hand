@@ -171,3 +171,15 @@ class HomeCleanerRegistrationForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your National Id No.'}),
         max_length=42)
     NID_number.label = "NID No."
+
+class PestControlServiceRegistrationForm(forms.Form):
+    license_info = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your license information'}),
+        max_length=42, required=False)
+    license_info.label = "License Information (Optional)"
+
+    chemical_info = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control',
+                                      'placeholder': 'e.g : Acephate, Imidacloprid, Dinotefuran... '}),
+        max_length=42, required=False)
+    chemical_info.label = "Which insecticides and pesticides do you use? (Optional)"
