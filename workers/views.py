@@ -94,10 +94,18 @@ def registerElectrician(request):
 
                 worker_id = request.session['user_id']
 
+                if license_info == None :
+                    license_info = "Not provided"
+                if yr_of_experience == None :
+                    yr_of_experience = 0
+                if qualification == None :
+                    qualification =  "Not provided"
+
+
                 conn.cursor().execute(
                     "INSERT INTO ELECTRICIAN(WORKER_ID,LICENSE_INFO,YEARS_OF_EXPERIENCE,QUALIFICATION)"
                     + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + str(
-                        yr_of_experience) + "','" + qualification + "')")
+                    yr_of_experience) + "','" + qualification + "')")
 
                 name = ""
                 for row in conn.cursor().execute(
@@ -173,6 +181,38 @@ def registerPestControlService(request):
                 return redirect('home_worker-home')
         else:
             form = PestControlServiceRegistrationForm()
+        return render(request, 'workers/reg_as_worker.html',
+                      {'form': form, 'regSecondPage': request.session['regDone1']})
+    else:
+        return redirect('register_as_worker')
+
+
+def registerPlumber(request):
+    # if user has completed first part of registration
+    if 'regDone1' in request.session and request.session['regDone1'] == True:
+        if request.method == 'POST':
+            form = PlumberRegistrationForm(request.POST)
+            if form.is_valid():
+                yr_of_experience = form.cleaned_data.get('yr_of_experience')
+
+                worker_id = request.session['user_id']
+
+                conn.cursor().execute(
+                    "INSERT INTO PLUMBER(WORKER_ID, YEARS_OF_EXPERIENCE )"
+                    + " VALUES ('" + str(worker_id) + "','" + str(
+                        yr_of_experience) + "')")
+
+                name = ""
+                for row in conn.cursor().execute(
+                        "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'"):
+                    name = row[0]
+
+                messages.success(request, f'Account created for {name}!')
+                request.session['regDone1'] = False
+                return redirect('home_worker-home')
+        else:
+            form = PlumberRegistrationForm()
         return render(request, 'workers/reg_as_worker.html',
                       {'form': form, 'regSecondPage': request.session['regDone1']})
     else:

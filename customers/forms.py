@@ -183,3 +183,12 @@ class PestControlServiceRegistrationForm(forms.Form):
                                       'placeholder': 'e.g : Acephate, Imidacloprid, Dinotefuran... '}),
         max_length=42, required=False)
     chemical_info.label = "Which insecticides and pesticides do you use? (Optional)"
+
+
+class PlumberRegistrationForm(forms.Form):
+
+    yr_of_experience = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+        max_value=60, required=False
+    )
+    yr_of_experience.label = "Years of Experience (Optional)"
