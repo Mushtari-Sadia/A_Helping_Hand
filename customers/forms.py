@@ -3,10 +3,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 import datetime
 
+# minimum user age = 15, max user age = 90
+min_user_age = 15
+max_user_age = 70
+
 now = datetime.datetime.now()
 BIRTH_YEAR_CHOICES = []
-inYr = now.year-80
-while inYr!=now.year-15 :
+inYr = now.year-max_user_age
+while inYr!=now.year-min_user_age :
     BIRTH_YEAR_CHOICES.append(str(inYr))
     inYr += 1
 
@@ -104,6 +108,12 @@ JOB_LIST = [
 
 ]
 
+OPTIONS = (
+        (1, "AC"),
+        (2, "TV"),
+        (3, "FRIDGE"),
+        (4, "GENERAL"),
+    )
 
 
 class WorkerRegisterForm(CustomerRegisterForm):
@@ -149,21 +159,27 @@ class LoginForm(forms.Form):
 
 
 class ElectricianRegistrationForm(forms.Form):
-    license_info = forms.CharField(
+
+    expertise = forms.MultipleChoiceField(initial=(4, "GENERAL"),widget=forms.CheckboxSelectMultiple,
+                                          choices=OPTIONS)
+    expertise.label = "What kind of Mechanic are you?"
+    license_info = forms.CharField(initial="NULL",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your license information'}),
-        max_length=42,required=False)
+        max_length=20,required=False)
     license_info.label = "License Information (Optional)"
 
     yr_of_experience = forms.IntegerField(
+        initial="0",
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
         max_value=60,required=False
     )
     yr_of_experience.label = "Years of Experience (Optional)"
 
-    qualification = forms.CharField(
+    qualification = forms.CharField(initial="NULL",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Educational qualifications'}),
-        max_length=100,required=False)
+        max_length=50,required=False)
     qualification.label = "Educational Qualification (Optional)"
+
 
 
 class HomeCleanerRegistrationForm(forms.Form):
@@ -173,21 +189,21 @@ class HomeCleanerRegistrationForm(forms.Form):
     NID_number.label = "NID No."
 
 class PestControlServiceRegistrationForm(forms.Form):
-    license_info = forms.CharField(
+    license_info = forms.CharField(initial="NULL",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your license information'}),
-        max_length=42, required=False)
+        max_length=20, required=False)
     license_info.label = "License Information (Optional)"
 
     chemical_info = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control',
                                       'placeholder': 'e.g : Acephate, Imidacloprid, Dinotefuran... '}),
-        max_length=42, required=False)
+        max_length=50, required=False)
     chemical_info.label = "Which insecticides and pesticides do you use? (Optional)"
 
 
 class PlumberRegistrationForm(forms.Form):
 
-    yr_of_experience = forms.IntegerField(
+    yr_of_experience = forms.IntegerField(initial=0,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
         max_value=60, required=False
     )

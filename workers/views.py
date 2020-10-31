@@ -32,7 +32,10 @@ def register(request):
     if 'regDone1' in request.session and request.session['regDone1'] == True:
         request.session['regDone1'] = False
     if 'loggedIn' in request.session and request.session['loggedIn'] == True:
-        return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn']})
+        if 'user_type' in request.session and request.session['user_type'] == "worker" :
+            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn']})
+        if 'user_type' in request.session and request.session['user_type'] == "customer" :
+            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn']})
     if request.method == 'POST':
         form = WorkerRegisterForm(request.POST)
         if form.is_valid():
@@ -44,12 +47,15 @@ def register(request):
             thana_name = form.cleaned_data.get('area_field')
             address = form.cleaned_data.get('address')
 
-            count = 0
+            count_cus = 0
+            count_wor = 0
+            for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'") :
+                count_cus += 1
             for row in conn.cursor().execute(
                     "SELECT * FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'"):
-                count += 1
+                count_wor += 1
             # if user has entered a phone number that no one has entered before
-            if count == 0:
+            if count_cus == 0 and count_wor == 0:
                 conn.cursor().execute(
                     "INSERT INTO SERVICE_PROVIDER(phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
                     + " VALUES ('" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
@@ -91,21 +97,20 @@ def registerElectrician(request):
                 license_info = form.cleaned_data.get('license_info')
                 yr_of_experience = form.cleaned_data.get('yr_of_experience')
                 qualification = form.cleaned_data.get('qualification')
+                expertise = form.cleaned_data.get('expertise')
 
                 worker_id = request.session['user_id']
-
-                if license_info == None :
-                    license_info = "Not provided"
-                if yr_of_experience == None :
-                    yr_of_experience = 0
-                if qualification == None :
-                    qualification =  "Not provided"
 
 
                 conn.cursor().execute(
                     "INSERT INTO ELECTRICIAN(WORKER_ID,LICENSE_INFO,YEARS_OF_EXPERIENCE,QUALIFICATION)"
                     + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + str(
                     yr_of_experience) + "','" + qualification + "')")
+
+                for i in expertise:
+                    conn.cursor().execute(
+                        "INSERT INTO AREA_OF_EXPERTISE(WORKER_ID,APPLIANCES_ID)"
+                        + " VALUES ('" + str(worker_id) + "','"  + str(i) + "')")
 
                 name = ""
                 for row in conn.cursor().execute(
@@ -163,6 +168,9 @@ def registerPestControlService(request):
             if form.is_valid():
                 license_info = form.cleaned_data.get('license_info')
                 chemical_info = form.cleaned_data.get('chemical_info')
+
+                if chemical_info == None :
+                    chemical_info = "NULL"
 
                 worker_id = request.session['user_id']
 

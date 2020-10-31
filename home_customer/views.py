@@ -9,6 +9,8 @@ def home(request):
         first_name = ""
         if request.session['user_id'] != -1 : # if a user is logged in
             print(request.session['user_id'])
+            if 'user_type' in request.session and request.session['user_type'] == "worker" :
+                return redirect('home_worker-home')
             for row in cursor.execute("SELECT FIRST_NAME FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']) ):
                 first_name = row[0]
             return render(request, 'home_customer/home.html',{'loggedIn' : request.session['loggedIn'], 'first_name' : first_name})
@@ -18,6 +20,8 @@ def home(request):
 
 def about(request):
     if 'loggedIn' in request.session:
+        if 'user_type' in request.session and request.session['user_type'] == "worker":
+            return redirect('home_worker-about')
         return render(request, 'home_customer/about.html',{'title' : 'About','loggedIn' : request.session['loggedIn']})
     else :
         return render(request, 'home_customer/about.html', {'title': 'About'})

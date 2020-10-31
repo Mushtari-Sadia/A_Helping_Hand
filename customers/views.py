@@ -19,10 +19,15 @@ def register(request):
             thana_name = form.cleaned_data.get('area_field')
             address = form.cleaned_data.get('address')
 
-            count = 0
-            for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'") :
-                    count +=1
-            if count == 0 :
+            count_cus = 0
+            count_wor = 0
+            for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'"):
+                count_cus += 1
+            for row in conn.cursor().execute(
+                    "SELECT * FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'"):
+                count_wor += 1
+            # if user has entered a phone number that no one has entered before
+            if count_cus == 0 and count_wor == 0:
                 conn.cursor().execute(
                     "INSERT INTO Customer(phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
                     + " VALUES ('" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
