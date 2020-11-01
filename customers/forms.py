@@ -208,3 +208,64 @@ class PlumberRegistrationForm(forms.Form):
         max_value=60, required=False
     )
     yr_of_experience.label = "Years of Experience (Optional)"
+
+
+
+class NurseRegistrationForm(forms.Form):
+
+    certificate_info = forms.CharField(initial="NULL",
+                                   widget=forms.TextInput(attrs={'class': 'form-control',
+                                                                 'placeholder': 'Enter your certificate information'}),
+                                   max_length=20, required=False)
+    certificate_info.label = "License Information (Optional)"
+
+    qualification = forms.CharField(initial="NULL",
+                                   widget=forms.TextInput(attrs={'class': 'form-control',
+                                                                 'placeholder': 'Describe your qualification'}),
+                                   max_length=50, required=False)
+    qualification.label = "Educational Qualification (Optional)"
+
+    yr_of_experience = forms.IntegerField(initial=0,
+                                          widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+                                          max_value=60, required=False
+                                          )
+    yr_of_experience.label = "Years of Experience (Optional)"
+
+
+
+class HouseShiftingAssistantRegistrationForm(forms.Form):
+
+
+    driving_license = forms.CharField(initial="NULL",
+                                       widget=forms.TextInput(attrs={'class': 'form-control',
+                                                                     'placeholder': 'Enter your driving license'}),
+                                       max_length=20, required=False)
+    driving_license.label = "Driving License"
+
+    car_type = forms.CharField(initial="NULL",
+                                      widget=forms.TextInput(attrs={'class': 'form-control',
+                                                                    'placeholder': 'What type of car?'}),
+                                      max_length=20, required=False)
+    car_type.label = "Type of Car"
+
+    car_no = forms.CharField(initial="NULL",
+                                      widget=forms.TextInput(attrs={'class': 'form-control',
+                                                                    'placeholder': 'Enter your car no.'}),
+                                      max_length=20, required=False)
+    car_no.label = "Car No."
+
+
+class CarpenterRegistrationForm(forms.Form):
+    shop_name = forms.CharField(initial="NULL",
+                                      widget=forms.TextInput(attrs={'class': 'form-control',
+                                                                    'placeholder': 'Enter your shop name'}),
+                                      max_length=20, required=False)
+    shop_name.label = "Shop Name"
+
+    shop_address = forms.CharField(initial="NULL",
+                               widget=forms.TextInput(attrs={'class': 'form-control',
+                                                             'placeholder': 'Enter the address of your shop'}),
+                               max_length=70, required=False)
+    shop_address.label = "Shop Address"
+
+
