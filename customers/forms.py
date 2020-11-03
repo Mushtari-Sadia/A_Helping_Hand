@@ -163,7 +163,7 @@ class ElectricianRegistrationForm(forms.Form):
     expertise = forms.MultipleChoiceField(initial=(4, "GENERAL"),widget=forms.CheckboxSelectMultiple,
                                           choices=OPTIONS)
     expertise.label = "What kind of Mechanic are you?"
-    license_info = forms.CharField(initial="NULL",
+    license_info = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your license information'}),
         max_length=20,required=False)
     license_info.label = "License Information (Optional)"
@@ -175,7 +175,7 @@ class ElectricianRegistrationForm(forms.Form):
     )
     yr_of_experience.label = "Years of Experience (Optional)"
 
-    qualification = forms.CharField(initial="NULL",
+    qualification = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Educational qualifications'}),
         max_length=50,required=False)
     qualification.label = "Educational Qualification (Optional)"
@@ -189,7 +189,7 @@ class HomeCleanerRegistrationForm(forms.Form):
     NID_number.label = "NID No."
 
 class PestControlServiceRegistrationForm(forms.Form):
-    license_info = forms.CharField(initial="NULL",
+    license_info = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your license information'}),
         max_length=20, required=False)
     license_info.label = "License Information (Optional)"
@@ -213,13 +213,13 @@ class PlumberRegistrationForm(forms.Form):
 
 class NurseRegistrationForm(forms.Form):
 
-    certificate_info = forms.CharField(initial="NULL",
+    certificate_info = forms.CharField(
                                    widget=forms.TextInput(attrs={'class': 'form-control',
                                                                  'placeholder': 'Enter your certificate information'}),
                                    max_length=20, required=False)
     certificate_info.label = "License Information (Optional)"
 
-    qualification = forms.CharField(initial="NULL",
+    qualification = forms.CharField(
                                    widget=forms.TextInput(attrs={'class': 'form-control',
                                                                  'placeholder': 'Describe your qualification'}),
                                    max_length=50, required=False)
@@ -236,19 +236,19 @@ class NurseRegistrationForm(forms.Form):
 class HouseShiftingAssistantRegistrationForm(forms.Form):
 
 
-    driving_license = forms.CharField(initial="NULL",
+    driving_license = forms.CharField(
                                        widget=forms.TextInput(attrs={'class': 'form-control',
                                                                      'placeholder': 'Enter your driving license'}),
                                        max_length=20, required=False)
     driving_license.label = "Driving License"
 
-    car_type = forms.CharField(initial="NULL",
+    car_type = forms.CharField(
                                       widget=forms.TextInput(attrs={'class': 'form-control',
                                                                     'placeholder': 'What type of car?'}),
                                       max_length=20, required=False)
     car_type.label = "Type of Car"
 
-    car_no = forms.CharField(initial="NULL",
+    car_no = forms.CharField(
                                       widget=forms.TextInput(attrs={'class': 'form-control',
                                                                     'placeholder': 'Enter your car no.'}),
                                       max_length=20, required=False)
@@ -256,13 +256,13 @@ class HouseShiftingAssistantRegistrationForm(forms.Form):
 
 
 class CarpenterRegistrationForm(forms.Form):
-    shop_name = forms.CharField(initial="NULL",
+    shop_name = forms.CharField(
                                       widget=forms.TextInput(attrs={'class': 'form-control',
                                                                     'placeholder': 'Enter your shop name'}),
                                       max_length=20, required=False)
     shop_name.label = "Shop Name"
 
-    shop_address = forms.CharField(initial="NULL",
+    shop_address = forms.CharField(
                                widget=forms.TextInput(attrs={'class': 'form-control',
                                                              'placeholder': 'Enter the address of your shop'}),
                                max_length=70, required=False)
