@@ -25,6 +25,12 @@ date_of_birth = ""
 thana_name = ""
 address = ""
 
+def replaceNoneWithNull(x) :
+    if x == None :
+        return "NULL"
+    else :
+        return x
+
 
 # TODO SADIA 2 : complete worker registration form
 def register(request):
@@ -46,6 +52,7 @@ def register(request):
             date_of_birth = form.cleaned_data.get('birth_year')
             thana_name = form.cleaned_data.get('area_field')
             address = form.cleaned_data.get('address')
+            job_field = form.cleaned_data.get('job_field')
 
             count_cus = 0
             count_wor = 0
@@ -57,8 +64,8 @@ def register(request):
             # if user has entered a phone number that no one has entered before
             if count_cus == 0 and count_wor == 0:
                 conn.cursor().execute(
-                    "INSERT INTO SERVICE_PROVIDER(phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
-                    + " VALUES ('" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
+                    "INSERT INTO SERVICE_PROVIDER(type,phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
+                    + " VALUES ('" + str(job_field) + "','" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
                     address + "'," + "TO_DATE('" + str(date_of_birth) + "', 'YYYY-MM-DD'))")
                 for row in conn.cursor().execute(
                         "SELECT WORKER_ID FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'"):
@@ -101,6 +108,10 @@ def registerElectrician(request):
 
                 worker_id = request.session['user_id']
 
+                license_info = replaceNoneWithNull(license_info)
+                yr_of_experience = replaceNoneWithNull(yr_of_experience)
+                qualification = replaceNoneWithNull(qualification)
+                expertise = replaceNoneWithNull(expertise)
 
                 conn.cursor().execute(
                     "INSERT INTO ELECTRICIAN(WORKER_ID,LICENSE_INFO,YEARS_OF_EXPERIENCE,QUALIFICATION)"
@@ -137,6 +148,8 @@ def registerHomeCleaner(request):
             if form.is_valid():
                 NID_number = form.cleaned_data.get('NID_number')
 
+                NID_number = replaceNoneWithNull(NID_number)
+
                 worker_id = request.session['user_id']
 
                 conn.cursor().execute(
@@ -169,8 +182,8 @@ def registerPestControlService(request):
                 license_info = form.cleaned_data.get('license_info')
                 chemical_info = form.cleaned_data.get('chemical_info')
 
-                if chemical_info == None :
-                    chemical_info = "NULL"
+                license_info = replaceNoneWithNull(license_info)
+                chemical_info = replaceNoneWithNull(chemical_info)
 
                 worker_id = request.session['user_id']
 
@@ -202,6 +215,8 @@ def registerPlumber(request):
             form = PlumberRegistrationForm(request.POST)
             if form.is_valid():
                 yr_of_experience = form.cleaned_data.get('yr_of_experience')
+
+                yr_of_experience = replaceNoneWithNull(yr_of_experience)
 
                 worker_id = request.session['user_id']
 
@@ -238,6 +253,9 @@ def registerNurse(request):
                 certificate_info = form.cleaned_data.get('certificate_info')
                 qualification = form.cleaned_data.get('qualification')
 
+                yr_of_experience = replaceNoneWithNull(yr_of_experience)
+                certificate_info = replaceNoneWithNull(certificate_info)
+                qualification = replaceNoneWithNull(qualification)
 
                 worker_id = request.session['user_id']
 
@@ -256,7 +274,7 @@ def registerNurse(request):
                 request.session['regDone1'] = False
                 return redirect('home_worker-home')
         else:
-            form = PlumberRegistrationForm()
+            form = NurseRegistrationForm()
         return render(request, 'workers/reg_as_worker.html',
                       {'form': form, 'regSecondPage': request.session['regDone1']})
     else:
@@ -272,6 +290,10 @@ def registerHouseShiftingAssistant(request):
                 driving_license = form.cleaned_data.get('driving_license')
                 car_type = form.cleaned_data.get('car_type')
                 car_no = form.cleaned_data.get('car_no')
+
+                driving_license = replaceNoneWithNull(driving_license)
+                car_type = replaceNoneWithNull(car_type)
+                car_no = replaceNoneWithNull(car_no)
 
                 worker_id = request.session['user_id']
 
@@ -289,7 +311,7 @@ def registerHouseShiftingAssistant(request):
                 request.session['regDone1'] = False
                 return redirect('home_worker-home')
         else:
-            form = PlumberRegistrationForm()
+            form = HouseShiftingAssistantRegistrationForm()
         return render(request, 'workers/reg_as_worker.html',
                       {'form': form, 'regSecondPage': request.session['regDone1']})
     else:
@@ -304,6 +326,9 @@ def registerCarpenter(request):
             if form.is_valid():
                 shop_name = form.cleaned_data.get('shop_name')
                 shop_address = form.cleaned_data.get('shop_address')
+
+                shop_name = replaceNoneWithNull(shop_name)
+                shop_address = replaceNoneWithNull(shop_address)
 
                 worker_id = request.session['user_id']
 
@@ -321,7 +346,7 @@ def registerCarpenter(request):
                 request.session['regDone1'] = False
                 return redirect('home_worker-home')
         else:
-            form = PlumberRegistrationForm()
+            form = CarpenterRegistrationForm()
         return render(request, 'workers/reg_as_worker.html',
                       {'form': form, 'regSecondPage': request.session['regDone1']})
     else:
