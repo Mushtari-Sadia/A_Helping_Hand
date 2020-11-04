@@ -12,12 +12,13 @@ body {
     margin: 0;
   }
 
-  .bg-steel {
-    background-color: #707090;
 
-  }
 
-  .site-header .navbar-nav .nav-link {
+.bg-steel {
+  background-image: linear-gradient(to right, #707090, black);
+}
+
+.site-header .navbar-nav .nav-link {
     color: #cbd5db;
   }
 
