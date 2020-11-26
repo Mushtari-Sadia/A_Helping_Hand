@@ -53,6 +53,16 @@ def register(request):
             thana_name = form.cleaned_data.get('area_field')
             address = form.cleaned_data.get('address')
             job_field = form.cleaned_data.get('job_field')
+            for i in JOB_LIST:
+                print(i[0])
+                print(job_field)
+                print(i[1])
+                print(type(job_field))
+                if int(i[0]) == int(job_field):
+                    job_field = i[1]
+                    print("after if job field : ",job_field)
+                    break
+
 
             count_cus = 0
             count_wor = 0

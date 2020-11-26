@@ -1,8 +1,8 @@
 from django.shortcuts import render,redirect
 from django.db import connection
+from customers.forms import JOB_LIST
 import django_tables2 as tables
 # Create your views here.
-
 cursor = connection.cursor()
 
 def home(request):
@@ -58,13 +58,13 @@ def orders(request):
             customer_id = request.session['user_id']
 
             for row in cursor.execute(
-                    "SELECT CUSTOMER_ID, ORDER_ID,TYPE,DESCRIPTION " +
+                    "SELECT CUSTOMER_ID,TYPE,DESCRIPTION " +
                     "FROM SERVICE_REQUEST " +
-                    "WHERE ORDER_ID = NULL " +
+                    "WHERE ORDER_ID IS NULL " +
                     "AND CUSTOMER_ID =" + str(customer_id) + " ;"):
                 data_dict = {}
-                data_dict['Type'] = row[2]
-                data_dict['Description'] = row[3]
+                data_dict['Type'] = row[1]
+                data_dict['Description'] = row[2]
                 pending_data.append(data_dict)
 
             for row in cursor.execute(
@@ -79,7 +79,6 @@ def orders(request):
                 data_dict['End_time'] = row[5].strftime("%m/%d/%Y, %H:%M:%S")
                 data.append(data_dict)
 
-        print(data)
 
         ordertable = OrderTable(data)
         pendingtable = PendingTable(pending_data)
