@@ -32,7 +32,6 @@ def replaceNoneWithNull(x) :
         return x
 
 
-# TODO SADIA 2 : complete worker registration form
 def register(request):
     # If current user goes to register, any registration done by him before will be deleted
     if 'regDone1' in request.session and request.session['regDone1'] == True:
