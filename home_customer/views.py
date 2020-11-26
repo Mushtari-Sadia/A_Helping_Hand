@@ -22,13 +22,28 @@ def home(request):
             return redirect('login')
     return redirect('login')
 
-def about(request):
+def profile(request):
     if 'loggedIn' in request.session:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
-            return redirect('home_worker-about')
-        return render(request, 'home_customer/about.html',{'title' : 'About','loggedIn' : request.session['loggedIn']})
+            return redirect('home_worker-profile')
+        for row in cursor.execute(
+                "SELECT FIRST_NAME || ' ' || LAST_NAME,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id'])):
+            name = row[0]
+            phone_number = row[1]
+            dob = row[2]
+            thana = row[3]
+            rating = row[4]
+            for i in AREA_LIST:
+                if int(i[0]) == int(thana):
+                    thana = i[1]
+                    break
+
+        return render(request, 'home_customer/about.html',{'title' : 'Profile','loggedIn' : request.session['loggedIn'],
+                                                           'name' : name,'phone_number' : phone_number,
+                                                           'dob' : dob,'thana' : thana,
+                                                           'rating' : (float(rating)*100)/5})
     else :
-        return render(request, 'home_customer/about.html', {'title': 'About'})
+        return render(request, 'home_customer/home.html', {'title': 'Home'})
 
 
 class OrderTable(tables.Table):
@@ -52,7 +67,7 @@ class PendingTable(tables.Table):
 
 
 def orders(request):
-    if 'loggedIn' in request.session:
+    if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
             return redirect('home_worker-home')
 
@@ -103,9 +118,9 @@ def orders(request):
     else :
         return render(request, 'home_customer/home.html', {'title': 'Home'})
 
-
+#TODO SADIA : FIX NAVBAR NOT SHOWING LOGGED IN INFO
 def request_service(request) :
-    if 'loggedIn' in request.session:
+    if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
             return redirect('home_worker-home')
     if 'user_id' in request.session and request.session['user_id'] != -1:

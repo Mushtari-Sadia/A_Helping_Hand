@@ -1,5 +1,4 @@
 {% load static %}
-<!DOCTYPE html>
 <html>
 <head>
 <link rel="icon" href=https://i.ibb.co/ykK7WKT/favicon.jpg">
@@ -32,8 +31,8 @@
               <a class="nav-item nav-link" href="{% url 'home_customer-home' %}">Home</a>
                 {% if loggedIn %}
                     <a class="nav-item nav-link" href="{% url 'home_customer-orders' %}">Order History</a>
+                    <a class="nav-item nav-link" href="{% url 'home_customer-profile' %}">My Profile</a>
                 {% endif %}
-              <a class="nav-item nav-link" href="{% url 'home_customer-about' %}">About</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
@@ -103,7 +102,7 @@
               </ul>
             </div>
             <div class="col-6 col-md">
-              <h5>About</h5>
+              <h5>profile</h5>
               <ul class="list-unstyled text-small">
                 <li><a class="text-muted" href="#">Team</a></li>
                 <li><a class="text-muted" href="#">Locations</a></li>

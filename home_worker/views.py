@@ -18,11 +18,11 @@ def home(request):
             return redirect('login')
     return redirect('login')
 
-def about(request):
+def profile(request):
     if 'loggedIn' in request.session:
         if 'user_type' in request.session and request.session['user_type'] == "customer":
-            return redirect('home_worker-about')
-        return render(request, 'home_worker/about.html',{'title' : 'About','loggedIn' : request.session['loggedIn']})
+            return redirect('home_worker-profile')
+        return render(request, 'home_worker/about.html',{'title' : 'profile','loggedIn' : request.session['loggedIn']})
     else :
-        return render(request, 'home_worker/about.html', {'title': 'About'})
+        return render(request, 'home_worker/about.html', {'title': 'profile'})
 
