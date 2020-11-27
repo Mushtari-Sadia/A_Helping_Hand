@@ -14,6 +14,7 @@ connection.cursor().execute("CREATE TABLE Customer(" +
                             "address VARCHAR2(70)," +
                             "date_of_birth DATE NOT NULL," +
                             "rating NUMBER(2,1) CONSTRAINT RATING_CHK CHECK (rating BETWEEN 0.0 AND 5.0)," +
+                            "RATED_BY NUMBER(9,0)," +
                             "CONSTRAINT CUSTOMER_PK PRIMARY KEY(customer_id) );"
                             )
 
@@ -29,6 +30,7 @@ connection.cursor().execute("CREATE TABLE Service_Provider(" +
                             "date_of_birth DATE NOT NULL," +
                             "payment_per_hour NUMBER," +
                             "rating NUMBER(2,1) CONSTRAINT RATING_CHK2 CHECK (rating BETWEEN 0.0 AND 5.0)," +
+                            "RATED_BY NUMBER(9,0)," +
                             "CONSTRAINT WORKER_PK PRIMARY KEY(worker_id));"
                             )
 

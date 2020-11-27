@@ -3,6 +3,7 @@ from django.db import connection
 from customers.forms import *
 from workers.views import replaceNoneWithNull
 import django_tables2 as tables
+from django_tables2 import TemplateColumn
 import datetime
 from django.contrib import messages
 # Create your views here.
@@ -51,6 +52,7 @@ class OrderTable(tables.Table):
     Type = tables.Column(verbose_name='Service Provider')
     Start_time = tables.Column(verbose_name='Start Time')
     End_time = tables.Column(verbose_name='End Time')
+    Rating = TemplateColumn(verbose_name='Rate Service',template_name='home_customer/rating.html')
 
     class Meta:
         template_name = "django_tables2/bootstrap.html"
@@ -179,3 +181,17 @@ def request_electrician(request) :
 
     else:
         return render(request, 'home_customer/home.html', {'title': 'Home'})
+
+
+def rate_a_worker(request,rating) :
+    sql = """
+    DECLARE
+	ID NUMBER;
+    BEGIN
+        SELECT WORKER_ID INTO ID FROM ORDER_INFO WHERE ORDER_ID=""" + str(rating) + """;
+        CALCRATING(5,ID,'WORKER');
+    END ;
+    """
+    connection.cursor().execute(sql)
+    messages.success(request, "Thank you for your feedback.")
+    return redirect('home_customer-orders')
