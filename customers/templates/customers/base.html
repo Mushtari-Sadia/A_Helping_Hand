@@ -30,7 +30,11 @@
             <div class="navbar-nav mr-auto">
               <a class="nav-item nav-link" href="{% url 'home_customer-home' %}">Home</a>
                 {% if loggedIn %}
+                {%if user_type == "customer" %}
                     <a class="nav-item nav-link" href="{% url 'home_customer-orders' %}">Order History</a>
+                {% else %}
+
+                {% endif %}
                     <a class="nav-item nav-link" href="{% url 'home_customer-profile' %}">My Profile</a>
                 {% endif %}
             </div>

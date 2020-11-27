@@ -18,13 +18,13 @@ def home(request):
                 return redirect('home_worker-home')
             for row in cursor.execute("SELECT FIRST_NAME FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']) ):
                 first_name = row[0]
-            return render(request, 'home_customer/home.html',{'loggedIn' : request.session['loggedIn'], 'first_name' : first_name})
+            return render(request, 'home_customer/home.html',{'loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'first_name' : first_name})
         else :
             return redirect('login')
     return redirect('login')
 
 def profile(request):
-    if 'loggedIn' in request.session:
+    if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
             return redirect('home_worker-profile')
         for row in cursor.execute(
@@ -34,17 +34,19 @@ def profile(request):
             dob = row[2]
             thana = row[3]
             rating = row[4]
+            if rating==None :
+                rating = 0
             for i in AREA_LIST:
                 if int(i[0]) == int(thana):
                     thana = i[1]
                     break
 
-        return render(request, 'home_customer/about.html',{'title' : 'Profile','loggedIn' : request.session['loggedIn'],
+        return render(request, 'home_customer/about.html',{'title' : 'Profile','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],
                                                            'name' : name,'phone_number' : phone_number,
                                                            'dob' : dob,'thana' : thana,
                                                            'rating' : (float(rating)*100)/5})
     else :
-        return render(request, 'home_customer/home.html', {'title': 'Home'})
+        return redirect('home_customer-home')
 
 
 class OrderTable(tables.Table):
@@ -116,71 +118,76 @@ def orders(request):
 
         ordertable = OrderTable(data)
         pendingtable = PendingTable(pending_data)
-        return render(request, 'home_customer/orders.html',{'title' : 'Orders','loggedIn' : request.session['loggedIn'],'ordertable' : ordertable,'pendingtable' : pendingtable})
+        return render(request, 'home_customer/orders.html',{'title' : 'Orders','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'ordertable' : ordertable,'pendingtable' : pendingtable})
     else :
-        return render(request, 'home_customer/home.html', {'title': 'Home'})
+        return redirect('home_customer-home')
 
 #TODO SADIA : FIX NAVBAR NOT SHOWING LOGGED IN INFO
-def request_service(request) :
+def request_service(request,type) :
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
             return redirect('home_worker-home')
-    if 'user_id' in request.session and request.session['user_id'] != -1:
-        customer_id = request.session['user_id']
-        if request.method == 'POST':
-            form = ServiceRequestForm(request.POST)
-            if form.is_valid():
-                type = form.cleaned_data.get('type')
-                description = form.cleaned_data.get('description')
-                req_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if 'user_id' in request.session and request.session['user_id'] != -1:
+            customer_id = request.session['user_id']
+            if request.method == 'POST':
+                form = ServiceRequestForm(request.POST)
+                if form.is_valid():
+                    description = form.cleaned_data.get('description')
+                    req_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    for i in JOB_LIST:
+                        if int(i[0]) == int(type):
+                            type = i[1]
+                            break
+                    description = replaceNoneWithNull(description)
+                    connection.cursor().execute(
+                            "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,DESCRIPTION,REQ_TIME)"
+                            + " VALUES ('" + str(customer_id) + "','" + str(type) + "','" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
+
+                    messages.success(request, "Your order was placed successfully.")
+                    return redirect('home_customer-orders')
+
+            else:
+                form = ServiceRequestForm()
                 for i in JOB_LIST:
                     if int(i[0]) == int(type):
                         type = i[1]
                         break
-                description = replaceNoneWithNull(description)
-                connection.cursor().execute(
-                        "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,DESCRIPTION,REQ_TIME)"
-                        + " VALUES ('" + str(customer_id) + "','" + str(type) + "','" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
-
-                messages.success(request, "Your order was placed successfully.")
-                return redirect('home_customer-orders')
-
-        else:
-            form = ServiceRequestForm()
-        return render(request, 'home_customer/request.html', {'title': 'Request','form': form})
+            return render(request, 'home_customer/request.html', {'title': 'Request','form': form,'type' : type})
 
     else:
-        return render(request, 'home_customer/home.html', {'title': 'Home'})
+        return redirect('home_customer-home')
 
 
 def request_electrician(request) :
-    if 'loggedIn' in request.session:
+    if 'loggedIn' in request.session and request.session['loggedIn'] == True:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
             return redirect('home_worker-home')
-    if 'user_id' in request.session and request.session['user_id'] != -1:
-        customer_id = request.session['user_id']
-        if request.method == 'POST':
-            form = ElectricianRequestForm(request.POST)
-            if form.is_valid():
-                type = form.cleaned_data.get('type')
-                description = form.cleaned_data.get('description')
-                req_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                description = replaceNoneWithNull(description)
-                print("INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
-                        + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) +"'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");")
-                connection.cursor().execute(
-                        "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
-                        + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) + ",'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
+        if 'user_id' in request.session and request.session['user_id'] != -1:
+            customer_id = request.session['user_id']
+            if request.method == 'POST':
+                form = ElectricianRequestForm(request.POST)
+                if form.is_valid():
+                    type = form.cleaned_data.get('type')
+                    description = form.cleaned_data.get('description')
+                    req_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    description = replaceNoneWithNull(description)
+                    print("INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
+                            + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) +"'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");")
+                    connection.cursor().execute(
+                            "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
+                            + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) + ",'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
 
-                messages.success(request, "Your order was placed successfully.")
-                return redirect('home_customer-orders')
+                    messages.success(request, "Your order was placed successfully.")
+                    return redirect('home_customer-orders')
 
-        else:
-            form = ElectricianRequestForm()
-        return render(request, 'home_customer/request.html', {'title': 'Request','form': form})
+
+            else:
+                form = ElectricianRequestForm()
+                type = "Electrician"
+            return render(request, 'home_customer/request.html', {'title': 'Request','form': form,'type':type})
 
     else:
-        return render(request, 'home_customer/home.html', {'title': 'Home'})
+        return redirect('home_customer-home')
 
 
 def rate_a_worker(request,rating) :

@@ -272,11 +272,11 @@ class CarpenterRegistrationForm(forms.Form):
 class ServiceRequestForm(forms.Form):
     new_list = JOB_LIST
     new_list.remove(('1', 'Electrician'))
-    type = forms.ChoiceField(
-        widget=forms.Select,
-        choices=new_list,
-    )
-    type.label = "What kind of service do you require?"
+    # type = forms.ChoiceField(
+    #     widget=forms.Select,
+    #     choices=new_list,
+    # )
+    # type.label = "What kind of service do you require?"
     description = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'I need...'}),
                               max_length=60, required=False)

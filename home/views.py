@@ -9,9 +9,9 @@ id = -1
 def register(request):
     if 'loggedIn' in request.session and request.session['loggedIn'] == True:
         if 'user_type' in request.session and request.session['user_type'] == "customer":
-            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn']})
+            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn'],'user_type' : request.session['user_type']})
         if 'user_type' in request.session and request.session['user_type'] == "worker":
-            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn']})
+            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn'],'user_type' : request.session['user_type']})
     return render(request, 'home/register.html')
 
 def logout(request):

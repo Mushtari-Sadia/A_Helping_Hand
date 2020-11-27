@@ -38,9 +38,9 @@ def register(request):
         request.session['regDone1'] = False
     if 'loggedIn' in request.session and request.session['loggedIn'] == True:
         if 'user_type' in request.session and request.session['user_type'] == "worker" :
-            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn']})
+            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn'],'user_type' : request.session['user_type']})
         if 'user_type' in request.session and request.session['user_type'] == "customer" :
-            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn']})
+            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn'],'user_type' : request.session['user_type']})
     if request.method == 'POST':
         form = WorkerRegisterForm(request.POST)
         if form.is_valid():

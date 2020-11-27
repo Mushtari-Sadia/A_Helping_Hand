@@ -7,7 +7,7 @@ from django.db import connection as conn
 
 def register(request):
     if 'loggedIn' in request.session and request.session['loggedIn'] == True:
-            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn']})
+            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn'],'user_type' : request.session['user_type']})
     if request.method == 'POST':
         form = CustomerRegisterForm(request.POST)
         if form.is_valid():
