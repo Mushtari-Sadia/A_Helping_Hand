@@ -66,3 +66,10 @@ def login(request):
             form = LoginForm()
         return render(request, 'home/login.html', {'form': form})
 
+def Team(request):
+
+    return render(request, 'home/Team.html')
+
+def Contact(request):
+
+    return render(request, 'home/Contact.html')

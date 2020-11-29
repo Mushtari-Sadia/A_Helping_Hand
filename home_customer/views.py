@@ -10,9 +10,9 @@ from django.contrib import messages
 cursor = connection.cursor()
 
 def home(request):
-    if 'loggedIn' in request.session and 'user_id' in request.session:
+    if 'loggedIn' in request.session and request.session['loggedIn']==True:
         first_name = ""
-        if request.session['user_id'] != -1 : # if a user is logged in
+        if 'user_id' in request.session and request.session['user_id'] != -1 : # if a user is logged in
             print(request.session['user_id'])
             if 'user_type' in request.session and request.session['user_type'] == "worker" :
                 return redirect('home_worker-home')
@@ -21,7 +21,8 @@ def home(request):
             return render(request, 'home_customer/home.html',{'loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'first_name' : first_name})
         else :
             return redirect('login')
-    return redirect('login')
+    else :
+        return redirect('login')
 
 def profile(request):
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
@@ -36,10 +37,10 @@ def profile(request):
             rating = row[4]
             if rating==None :
                 rating = 0
-            for i in AREA_LIST:
-                if int(i[0]) == int(thana):
-                    thana = i[1]
-                    break
+            # for i in AREA_LIST:
+            #     if int(i[0]) == int(thana):
+            #         thana = i[1]
+            #         break
 
         return render(request, 'home_customer/about.html',{'title' : 'Profile','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],
                                                            'name' : name,'phone_number' : phone_number,
