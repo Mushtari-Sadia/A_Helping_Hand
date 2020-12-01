@@ -264,7 +264,7 @@ def OrderHistory(request):
 
         allJobHistory = JobHistory(jobHistory)
         currenttable = CurrentlyRunningJobs(currentJobs)
-
+        print(jobHistory)
         return render(request, 'home_worker/orderHistory.html', {'title': 'Home', 'loggedIn': request.session['loggedIn'],
                                                          'user_type': request.session['user_type'],'currenttable' : currenttable, 'historytable' : allJobHistory,'empcurrenttable' : empcurrentjobs,'emphistoryTable' : empjobhistory})
     else:
