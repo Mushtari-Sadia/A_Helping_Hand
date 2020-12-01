@@ -125,7 +125,7 @@ def orders(request):
             empty = True
         if len(pending_data) == 0 :
             emptyPending = True
-
+        print(data)
         ordertable = OrderTable(data)
         pendingtable = PendingTable(pending_data)
         return render(request, 'home_customer/orders.html',{'title' : 'Orders','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'ordertable' : ordertable,'pendingtable' : pendingtable,'empty' : empty,'emptyPending' : emptyPending})

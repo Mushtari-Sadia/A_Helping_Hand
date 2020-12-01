@@ -9,5 +9,5 @@ urlpatterns = [
     path('orders/', views.orders, name='home_customer-orders'),
     url(r'^request/(?P<type>\d+)$', views.request_service, name='service_request'),
     path('request/electrician/', views.request_electrician, name='electrician_request'),
-    url (r'^orders/(?P<rating>\d)/order(?P<Order_id>\d)/', views.rate, name='rate'),
+    url (r'^orders/(?P<rating>\d+)/order(?P<Order_id>\d+)/', views.rate, name='rate'),
 ]

@@ -77,11 +77,11 @@ EXCEPTION
 
 END;
 """
+connection.cursor().execute(calcrating)
 execution = """
 BEGIN
 	CALCRATING(1,2,'customer');
 END ;
 """
-connection.cursor().execute(calcrating)
-# connection.cursor().execute(execution)
+connection.cursor().execute(execution)
 connection.cursor().execute(timediff)
