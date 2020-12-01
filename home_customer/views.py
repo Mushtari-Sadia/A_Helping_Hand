@@ -109,8 +109,14 @@ def orders(request):
                 data_dict = {}
                 data_dict['Order_id'] = row[2]
                 data_dict['Type'] = row[3]
-                data_dict['Start_time'] = row[4].strftime("%m/%d/%Y, %H:%M:%S")
-                data_dict['End_time'] = row[5].strftime("%m/%d/%Y, %H:%M:%S")
+                start_time = row[4]
+                end_time = row[5]
+                if start_time != None :
+                    start_time = start_time.strftime("%m/%d/%Y, %H:%M:%S")
+                if end_time != None :
+                    end_time = end_time.strftime("%m/%d/%Y, %H:%M:%S")
+                data_dict['Start_time'] = start_time
+                data_dict['End_time'] = end_time
                 data.append(data_dict)
 
 

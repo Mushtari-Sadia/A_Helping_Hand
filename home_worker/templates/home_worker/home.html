@@ -1,121 +1,59 @@
 {% extends "customers/base.html" %}
 {% block content %}
-    {% if loggedIn %}
-        <div>
+{% load render_table from django_tables2 %}
+<div>
             <h1 class="body">
+            {% if first_name|length > 0 %}
                 Welcome, {{ first_name }}!
+            {% else %}
+                Welcome!
+            {% endif %}
             </h1>
         </div>
 
-        <div class="container py-5">
-    <div class="row text-center text-white mb-5">
-        <div class="col-lg-7 mx-auto">
-            <h1 class="display-4">List of Service Requests</h1>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <!-- List group-->
-            <ul class="list-group shadow">
-                <!-- list group item-->
-                <li class="list-group-item">
-                    <!-- Custom content-->
-                    <div class="media align-items-lg-center flex-column flex-lg-row p-3">
-                        <div class="media-body order-2 order-lg-1">
-                            <h5 class="mt-0 font-weight-bold mb-2">Customer : </h5>
-                            <h5 class="mt-0 font-weight-bold mb-2">Contact No. : </h5>
-                            <h5 class="mt-0 font-weight-bold mb-2">Location : </h5>
-                            <p class="font-italic text-muted mb-0 small"></p>
-                            <div class="d-flex align-items-center justify-content-between mt-1">
-                                <h6 class="font-weight-bold my-2"></h6>
-                                <ul class="list-inline small">
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star-o text-gray"></i></li>
-                                </ul>
-                            </div>
-                            <a class="btn btn-outline-dark" href="#">Accept</a>
-                        </div>
-                    </div> <!-- End -->
-                </li> <!-- End -->
-                <!-- list group item-->
-                <li class="list-group-item">
-                    <!-- Custom content-->
-                     <div class="media align-items-lg-center flex-column flex-lg-row p-3">
-                        <div class="media-body order-2 order-lg-1">
-                            <h5 class="mt-0 font-weight-bold mb-2">Customer : </h5>
-                            <h5 class="mt-0 font-weight-bold mb-2">Contact No. : </h5>
-                            <h5 class="mt-0 font-weight-bold mb-2">Location : </h5>
-                            <p class="font-italic text-muted mb-0 small"></p>
-                            <div class="d-flex align-items-center justify-content-between mt-1">
-                                <h6 class="font-weight-bold my-2"></h6>
-                                <ul class="list-inline small">
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star-o text-gray"></i></li>
-                                </ul>
-                            </div>
-                            <a class="btn btn-outline-dark" href="#">Accept</a>
-                        </div>
-                    </div> <!-- End -->
-                </li> <!-- End -->
-                <!-- list group item -->
-                <li class="list-group-item">
-                    <!-- Custom content-->
-                     <div class="media align-items-lg-center flex-column flex-lg-row p-3">
-                        <div class="media-body order-2 order-lg-1">
-                            <h5 class="mt-0 font-weight-bold mb-2">Customer : </h5>
-                            <h5 class="mt-0 font-weight-bold mb-2">Contact No. : </h5>
-                            <h5 class="mt-0 font-weight-bold mb-2">Location : </h5>
-                            <p class="font-italic text-muted mb-0 small"></p>
-                            <div class="d-flex align-items-center justify-content-between mt-1">
-                                <h6 class="font-weight-bold my-2"></h6>
-                                <ul class="list-inline small">
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star-o text-gray"></i></li>
-                                </ul>
-                            </div>
-                            <a class="btn btn-outline-dark" href="#">Accept</a>
-                        </div>
-                    </div> <!-- End -->
-                </li> <!-- End -->
-                <!-- list group item -->
-                <li class="list-group-item">
-                    <!-- Custom content-->
-                     <div class="media align-items-lg-center flex-column flex-lg-row p-3">
-                        <div class="media-body order-2 order-lg-1">
-                            <h5 class="mt-0 font-weight-bold mb-2">Customer : </h5>
-                            <h5 class="mt-0 font-weight-bold mb-2">Contact No. : </h5>
-                            <h5 class="mt-0 font-weight-bold mb-2">Location : </h5>
-                            <p class="font-italic text-muted mb-0 small"></p>
-                            <div class="d-flex align-items-center justify-content-between mt-1">
-                                <h6 class="font-weight-bold my-2"></h6>
-                                <ul class="list-inline small">
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star text-success"></i></li>
-                                    <li class="list-inline-item m-0"><i class="fa fa-star-o text-gray"></i></li>
-                                </ul>
-                            </div>
-                            <a class="btn btn-outline-dark" href="#">Accept</a>
-                        </div>
-                    </div> <!-- End -->
-                </li> <!-- End -->
-            </ul> <!-- End -->
-        </div>
-    </div>
-</div>
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            <meta name="description" content="">
+            <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+            <meta name="generator" content="Jekyll v4.1.1">
+            <title>Product example · Bootstrap</title>
 
+            <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/product/">
 
+            <!-- Bootstrap core CSS -->
+        <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
 
+            <style>
+              .bd-placeholder-img {
+                font-size: 1.125rem;
+                text-anchor: middle;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+              }
+
+              @media (min-width: 768px) {
+                .bd-placeholder-img-lg {
+                  font-size: 3.5rem;
+                }
+              }
+            </style>
+          </head>
+
+<body>
+    <br>
+    {% if empty %}
+        <h1>There are currently no available jobs near you.</h1>
+    {% else %}
+        <h1>Current Available Requests</h1>
+        <br>
+        {% render_table availableRequestTable %}
     {% endif %}
 
+
+</body>
 {% endblock content %}

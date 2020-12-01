@@ -42,7 +42,9 @@ connection.cursor().execute("CREATE TABLE Order_Info( " +
                             "worker_id NUMBER," +
                             "start_time TIMESTAMP(0)," +
                             "end_time TIMESTAMP(0)," +
+                            "REQUEST_NO NUMBER," +
                             "CONSTRAINT ORDER_INFO_FK FOREIGN KEY(worker_id) REFERENCES Service_Provider(worker_id) ON DELETE CASCADE," +
+                            "CONSTRAINT ORDER_INFO_FK2 FOREIGN KEY(REQUEST_NO) REFERENCES SERVICE_REQUEST(REQUEST_NO) ON DELETE CASCADE," +
                             "CONSTRAINT ORDER_INFO_PK PRIMARY KEY(order_id)" + ");"
                             )
 

@@ -293,10 +293,6 @@ a {
 	line-height: 1.7;
 	color: #666666;
 	margin: 0px;
-	transition: all 0.4s;
-	-webkit-transition: all 0.4s;
-  -o-transition: all 0.4s;
-  -moz-transition: all 0.4s;
 }
 
 a:focus {
@@ -483,8 +479,6 @@ textarea.input100 {
 }
 
 .input100:focus + .focus-input100 {
-  -webkit-animation: anim-shadow 0.5s ease-in-out forwards;
-  animation: anim-shadow 0.5s ease-in-out forwards;
 }
 
 @-webkit-keyframes anim-shadow {
@@ -562,10 +556,6 @@ textarea.input100 {
   align-items: center;
   padding: 0 25px;
 
-  -webkit-transition: all 0.4s;
-  -o-transition: all 0.4s;
-  -moz-transition: all 0.4s;
-  transition: all 0.4s;
 }
 
 .contact100-form-btn:hover {
