@@ -194,15 +194,32 @@ def request_electrician(request) :
         return redirect('home_customer-home')
 
 
-def rate_a_worker(request,rating) :
-    sql = """
-    DECLARE
-	ID NUMBER;
-    BEGIN
-        SELECT WORKER_ID INTO ID FROM ORDER_INFO WHERE ORDER_ID=""" + str(rating) + """;
-        CALCRATING(5,ID,'WORKER');
-    END ;
-    """
-    connection.cursor().execute(sql)
-    messages.success(request, "Thank you for your feedback.")
-    return redirect('home_customer-orders')
+def rate(request, rating, Order_id) :
+    print(rating,Order_id)
+    if 'loggedIn' in request.session and request.session['loggedIn'] == True:
+        if 'user_type' in request.session and request.session['user_type'] == "customer":
+            sql = """
+            DECLARE
+            ID NUMBER;
+            BEGIN
+                SELECT WORKER_ID INTO ID FROM ORDER_INFO WHERE ORDER_ID=""" + str(Order_id) + """;
+                CALCRATING(""" + str(rating) + """,ID,'WORKER');
+            END ;
+            """
+            connection.cursor().execute(sql)
+            messages.success(request, "Thank you for your feedback.")
+            return redirect('home_customer-orders')
+        if 'user_type' in request.session and request.session['user_type'] == "worker":
+            sql = """
+            DECLARE
+            ID NUMBER;
+            BEGIN
+                SELECT CUSTOMER_ID INTO ID FROM SERVICE_REQUEST WHERE ORDER_ID=""" + str(Order_id) + """;
+                CALCRATING(""" + str(rating) + """,ID,'CUSTOMER');
+            END ;
+            """
+            connection.cursor().execute(sql)
+            messages.success(request, "Thank you for your feedback.")
+            return redirect('home_worker-orders')
+    else:
+        return redirect('login')
