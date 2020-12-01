@@ -74,7 +74,9 @@ def orders(request):
             return redirect('home_worker-home')
 
         data = []
+        empty = False
         pending_data = []
+        emptyPending = False
         cur = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -119,10 +121,14 @@ def orders(request):
                 data_dict['End_time'] = end_time
                 data.append(data_dict)
 
+        if len(data) == 0 :
+            empty = True
+        if len(pending_data) == 0 :
+            emptyPending = True
 
         ordertable = OrderTable(data)
         pendingtable = PendingTable(pending_data)
-        return render(request, 'home_customer/orders.html',{'title' : 'Orders','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'ordertable' : ordertable,'pendingtable' : pendingtable})
+        return render(request, 'home_customer/orders.html',{'title' : 'Orders','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'ordertable' : ordertable,'pendingtable' : pendingtable,'empty' : empty,'emptyPending' : emptyPending})
     else :
         return redirect('home_customer-home')
 
