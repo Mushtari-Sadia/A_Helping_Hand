@@ -30,11 +30,13 @@
             <div class="navbar-nav mr-auto">
               <a class="nav-item nav-link" href="{% url 'home_customer-home' %}">Home</a>
                 {% if loggedIn %}
-                {%if user_type == "customer" %}
-                    <a class="nav-item nav-link" href="{% url 'home_customer-orders' %}">Order History</a>
-                {% else %}
+                    {%if user_type == "customer" %}
+                        <a class="nav-item nav-link" href="{% url 'home_customer-orders' %}">Order History</a>
+                    {% elif user_type == "worker" %}
+                        <a class="nav-item nav-link" href="{% url 'home_worker-orders' %}">Service History</a>
+                    {% else %}
 
-                {% endif %}
+                    {% endif %}
                     <a class="nav-item nav-link" href="{% url 'home_customer-profile' %}">My Profile</a>
                 {% endif %}
             </div>

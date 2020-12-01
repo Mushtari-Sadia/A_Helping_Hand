@@ -109,8 +109,14 @@ def orders(request):
                 data_dict = {}
                 data_dict['Order_id'] = row[2]
                 data_dict['Type'] = row[3]
-                data_dict['Start_time'] = row[4].strftime("%m/%d/%Y, %H:%M:%S")
-                data_dict['End_time'] = row[5].strftime("%m/%d/%Y, %H:%M:%S")
+                start_time = row[4]
+                end_time = row[5]
+                if start_time != None :
+                    start_time = start_time.strftime("%m/%d/%Y, %H:%M:%S")
+                if end_time != None :
+                    end_time = end_time.strftime("%m/%d/%Y, %H:%M:%S")
+                data_dict['Start_time'] = start_time
+                data_dict['End_time'] = end_time
                 data.append(data_dict)
 
 
@@ -188,15 +194,32 @@ def request_electrician(request) :
         return redirect('home_customer-home')
 
 
-def rate_a_worker(request,rating) :
-    sql = """
-    DECLARE
-	ID NUMBER;
-    BEGIN
-        SELECT WORKER_ID INTO ID FROM ORDER_INFO WHERE ORDER_ID=""" + str(rating) + """;
-        CALCRATING(5,ID,'WORKER');
-    END ;
-    """
-    connection.cursor().execute(sql)
-    messages.success(request, "Thank you for your feedback.")
-    return redirect('home_customer-orders')
+def rate(request, rating, Order_id) :
+    print(rating,Order_id)
+    if 'loggedIn' in request.session and request.session['loggedIn'] == True:
+        if 'user_type' in request.session and request.session['user_type'] == "customer":
+            sql = """
+            DECLARE
+            ID NUMBER;
+            BEGIN
+                SELECT WORKER_ID INTO ID FROM ORDER_INFO WHERE ORDER_ID=""" + str(Order_id) + """;
+                CALCRATING(""" + str(rating) + """,ID,'WORKER');
+            END ;
+            """
+            connection.cursor().execute(sql)
+            messages.success(request, "Thank you for your feedback.")
+            return redirect('home_customer-orders')
+        if 'user_type' in request.session and request.session['user_type'] == "worker":
+            sql = """
+            DECLARE
+            ID NUMBER;
+            BEGIN
+                SELECT CUSTOMER_ID INTO ID FROM SERVICE_REQUEST WHERE ORDER_ID=""" + str(Order_id) + """;
+                CALCRATING(""" + str(rating) + """,ID,'CUSTOMER');
+            END ;
+            """
+            connection.cursor().execute(sql)
+            messages.success(request, "Thank you for your feedback.")
+            return redirect('home_worker-orders')
+    else:
+        return redirect('login')
