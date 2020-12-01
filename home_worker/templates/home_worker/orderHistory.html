@@ -4,10 +4,19 @@
 
     <h1>Currently Running Jobs</h1>
     <br>
-    {% render_table currenttable %}
-
+    {% if empcurrenttable %}
+        <p> You don't have any running jobs right now. Check out available jobs <a href="{% url 'home_worker-home' %}">here!</a></p>
+    {% else %}
+        {% render_table currenttable %}
+    {% endif %}
+    <br>
+    <br>
+    <br>
     <h1>Job History </h1>
     <br>
-    {% render_table historytable %}
-
+    {% if emphistoryTable %}
+        <p> No previous jobs.</p>
+    {% else %}
+        {% render_table historytable %}
+    {% endif %}
 {% endblock content %}

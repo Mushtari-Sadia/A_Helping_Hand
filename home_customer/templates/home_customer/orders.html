@@ -8,11 +8,21 @@
 <body>
     <h1>Current Pending Requests</h1>
     <br>
-    {% render_table pendingtable %}
-
+    {%if emptyPending%}
+        <p>There are currently no pending requests from you.</p>
+    {% else %}
+        {% render_table pendingtable %}
+    {% endif %}
+    <br>
+    <br>
+    <br>
     <h1>Order History </h1>
     <br>
-    {% render_table ordertable %}
+    {%if empty%}
+        <p>You have no previous orders.</p>
+    {% else %}
+        {% render_table ordertable %}
+    {% endif %}
 
 </body>
 {% endblock content %}

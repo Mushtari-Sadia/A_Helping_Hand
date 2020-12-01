@@ -114,9 +114,9 @@ def orders(request):
             print("all data", data)
             availableRequestTable = CurrentlyAvailableRequests(data)
             # pendingtable = PendingTable(pending_data)
-            empty = False;
+            empty = False
             if len(data) == 0 :
-                empty = True;
+                empty = True
                 return render(request, 'home_worker/home.html',{'title' : 'Home','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'first_name': first_name, 'empty' : empty})
             else :
                 return render(request, 'home_worker/home.html',{'title' : 'Home','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'first_name': first_name, 'empty' : empty, 'availableRequestTable' : availableRequestTable})
@@ -176,6 +176,7 @@ class JobHistory(tables.Table):
     Order_id = tables.Column(verbose_name='Order ID')
     Start_time = tables.Column(verbose_name='Start Time')
     End_time = tables.Column(verbose_name='End Time')
+    Rating = TemplateColumn(verbose_name='Rate Customer',template_name='home_customer/rating.html')
 
     class Meta:
         template_name = "django_tables2/bootstrap.html"
@@ -186,8 +187,10 @@ def OrderHistory(request):
         if 'user_type' in request.session and request.session['user_type'] == "customer":
             return redirect('home_customer-orders')
 
-        currrentJobs = []
+        currentJobs = []
+        empcurrentjobs = False
         jobHistory = []
+        empjobhistory = False
 
         if 'user_id' in request.session and request.session['user_id'] != -1:
             worker_id = request.session['user_id']
@@ -252,14 +255,18 @@ def OrderHistory(request):
                     data_dict['Start_time'] = start_time
                     data_dict['End_time'] = end_time
 
-                    currrentJobs.append(data_dict)
+                    currentJobs.append(data_dict)
+
+        if len(jobHistory) == 0 :
+            empjobhistory = True
+        if len(currentJobs) == 0:
+            empcurrentjobs = True
 
         allJobHistory = JobHistory(jobHistory)
-
-        currenttable = CurrentlyRunningJobs(currrentJobs)
+        currenttable = CurrentlyRunningJobs(currentJobs)
 
         return render(request, 'home_worker/orderHistory.html', {'title': 'Home', 'loggedIn': request.session['loggedIn'],
-                                                         'user_type': request.session['user_type'],'currenttable' : currenttable, 'historytable' : allJobHistory})
+                                                         'user_type': request.session['user_type'],'currenttable' : currenttable, 'historytable' : allJobHistory,'empcurrenttable' : empcurrentjobs,'emphistoryTable' : empjobhistory})
     else:
         return redirect('home_customer-home')
 
