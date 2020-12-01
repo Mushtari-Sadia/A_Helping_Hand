@@ -84,3 +84,4 @@ END ;
 """
 connection.cursor().execute(calcrating)
 # connection.cursor().execute(execution)
+connection.cursor().execute(timediff)

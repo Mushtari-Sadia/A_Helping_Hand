@@ -37,10 +37,7 @@ def profile(request):
             rating = row[4]
             if rating==None :
                 rating = 0
-            # for i in AREA_LIST:
-            #     if int(i[0]) == int(thana):
-            #         thana = i[1]
-            #         break
+
 
         return render(request, 'home_customer/about.html',{'title' : 'Profile','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],
                                                            'name' : name,'phone_number' : phone_number,

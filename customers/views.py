@@ -17,7 +17,13 @@ def register(request):
             password1 = form.cleaned_data.get('password1')
             date_of_birth = form.cleaned_data.get('birth_year')
             thana_name = form.cleaned_data.get('area_field')
+
             address = form.cleaned_data.get('address')
+
+            for i in AREA_LIST:
+                if int(i[0]) == int(thana_name):
+                    thana_name = i[1]
+                    break
 
             count_cus = 0
             count_wor = 0

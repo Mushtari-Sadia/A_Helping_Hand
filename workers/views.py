@@ -63,6 +63,11 @@ def register(request):
                     break
 
 
+            for i in AREA_LIST:
+                if int(i[0]) == int(thana_name):
+                    thana_name = i[1]
+                    break
+
             count_cus = 0
             count_wor = 0
             for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'") :
