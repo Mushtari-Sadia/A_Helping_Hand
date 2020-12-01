@@ -269,3 +269,28 @@ class CarpenterRegistrationForm(forms.Form):
     shop_address.label = "Shop Address"
 
 
+class ServiceRequestForm(forms.Form):
+    new_list = JOB_LIST
+    new_list.remove(('1', 'Electrician'))
+    # type = forms.ChoiceField(
+    #     widget=forms.Select,
+    #     choices=new_list,
+    # )
+    # type.label = "What kind of service do you require?"
+    description = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'I need...'}),
+                              max_length=60, required=False)
+    description.label = "Provide a short description of what you need. (Optional)"
+
+class ElectricianRequestForm(forms.Form):
+
+    type = forms.ChoiceField(
+        widget=forms.Select,
+        choices=OPTIONS,
+    )
+    type.label = "What kind of mechanic do you require?"
+    description = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'My AC is not working...'}),
+                              max_length=60, required=False)
+    description.label = "Provide a short description of what you need. (Optional)"
+

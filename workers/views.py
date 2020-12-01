@@ -32,16 +32,15 @@ def replaceNoneWithNull(x) :
         return x
 
 
-# TODO SADIA 2 : complete worker registration form
 def register(request):
     # If current user goes to register, any registration done by him before will be deleted
     if 'regDone1' in request.session and request.session['regDone1'] == True:
         request.session['regDone1'] = False
     if 'loggedIn' in request.session and request.session['loggedIn'] == True:
         if 'user_type' in request.session and request.session['user_type'] == "worker" :
-            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn']})
+            return render(request, 'home_worker/home.html', {'loggedIn': request.session['loggedIn'],'user_type' : request.session['user_type']})
         if 'user_type' in request.session and request.session['user_type'] == "customer" :
-            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn']})
+            return render(request, 'home_customer/home.html', {'loggedIn': request.session['loggedIn'],'user_type' : request.session['user_type']})
     if request.method == 'POST':
         form = WorkerRegisterForm(request.POST)
         if form.is_valid():
@@ -53,6 +52,21 @@ def register(request):
             thana_name = form.cleaned_data.get('area_field')
             address = form.cleaned_data.get('address')
             job_field = form.cleaned_data.get('job_field')
+            for i in JOB_LIST:
+                print(i[0])
+                print(job_field)
+                print(i[1])
+                print(type(job_field))
+                if int(i[0]) == int(job_field):
+                    job_field = i[1]
+                    print("after if job field : ",job_field)
+                    break
+
+
+            for i in AREA_LIST:
+                if int(i[0]) == int(thana_name):
+                    thana_name = i[1]
+                    break
 
             count_cus = 0
             count_wor = 0

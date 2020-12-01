@@ -30,5 +30,7 @@ urlpatterns = [
     path('', include('workers.urls')),
     path('', home_views.login,name = 'login'),
     path('logout/', home_views.logout,name = 'logout'),
+    path('aboutteam/', home_views.Team, name = 'team'),
+    path('contactus/', home_views.Contact, name = 'contact'),
 
 ]
