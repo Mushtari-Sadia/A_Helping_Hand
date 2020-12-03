@@ -61,6 +61,18 @@ class OrderTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
 
 
+class GroupTable(tables.Table):
+    order_id = tables.Column(verbose_name='Order ID')
+    Team_leader_name = tables.Column(verbose_name='Requested By')
+    Type = tables.Column(verbose_name='Service')
+    worker_contact_no = tables.Column(verbose_name='Contact No.')
+    #Estimated_payment =
+    approve_button = TemplateColumn('<a class="btn btn-dark" href="{% url "approveGroup"  record.order_id  %}">Approve</a>',verbose_name='Approve Request')
+
+    class Meta:
+        template_name = "django_tables2/bootstrap.html"
+
+
 class PendingTable(tables.Table):
     Type = tables.Column(verbose_name='Service Provider')
     Description = tables.Column(verbose_name='Description')
@@ -80,6 +92,8 @@ def orders(request):
         empty = False
         pending_data = []
         emptyPending = False
+        group_data = []
+        emptyGrp = False
         cur = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -114,6 +128,27 @@ def orders(request):
                 # print_all_sql(data_dict['Request_time'])
                 pending_data.append(data_dict)
 
+            # TODO FARDIN ADD QUERY FOR GROUP TABLE IN CUSTOMER END : SELECT ORDER_ID,TEAM_LEADER_NAME,TYPE,
+            # TEAM_LEADER_CONTACT_NO IN THAT ORDER
+            # (Currently pending requests and order history er majhkhane arekta table add hobe for group approval.
+            # Here, Query → Order info te jader order id created but team leader id not null)
+
+            #uncomment below lines
+            # sql = """"""
+            # print_all_sql(sql)
+            # for row in cursor.execute(sql):
+            #     data_dict = {}
+            #     data_dict['order_id'] = row[0]
+            #     data_dict['Team_leader_name'] = row[1]
+            #     data_dict['Type'] = row[2]
+            #     data_dict['worker_contact_no'] = row[3]
+            # group_data.append(data_dict)
+
+
+            # TODO FARDIN MODIFYQUERY
+            # (Order history table e jei query oitar shathe arekta condition add hobe.
+            # When order info.team leader id == null tokhoni order history te entry show korbe.
+
             print_all_sql("SELECT S.CUSTOMER_ID, S.ORDER_ID, O.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME " +
                     "FROM SERVICE_REQUEST S, ORDER_INFO O " +
                     "WHERE S.ORDER_ID = O.ORDER_ID " +
@@ -141,12 +176,32 @@ def orders(request):
             empty = True
         if len(pending_data) == 0 :
             emptyPending = True
-        # print_all_sql(data)
+        if len(data) == 0 :
+            empty = True
+        if len(group_data) == 0 :
+            emptyGrp = True
+
         ordertable = OrderTable(data)
         pendingtable = PendingTable(pending_data)
-        return render(request, 'home_customer/orders.html',{'title' : 'Orders','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'ordertable' : ordertable,'pendingtable' : pendingtable,'empty' : empty,'emptyPending' : emptyPending})
+        grouptable = GroupTable(group_data)
+        return render(request, 'home_customer/orders.html',{'title' : 'Orders','loggedIn' : request.session['loggedIn'],
+                                                            'user_type' : request.session['user_type'],
+                                                            'ordertable' : ordertable,'pendingtable' : pendingtable,
+                                                            'grouptable' : grouptable,
+                                                            'empty' : empty,'emptyPending' : emptyPending,
+                                                            'emptyGrp' : emptyGrp})
     else :
         return redirect('home_customer-home')
+
+
+def approveGroup(request,order_id) :
+    #TODO FARDIN addquery (THIS IS THE APPROVE GROUP TABLE IN CUSTOMER END)
+    # (Approve e click korle →
+    # Order info table er oi order id use kore
+    # query kore
+    # oi row er team leader id ta null kore dibe.)
+    return redirect('home_customer-orders')
+
 
 #TODO SADIA : FIX NAVBAR NOT SHOWING LOGGED IN INFO
 def request_service(request,type) :

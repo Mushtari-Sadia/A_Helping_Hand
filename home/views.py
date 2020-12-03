@@ -76,12 +76,12 @@ def Contact(request):
 
     return render(request, 'home/Contact.html')
 
-i=1
+
 def print_all_sql(sql) :
     f = open("sql.txt", "a")
-    f.write("--Query----------")
+    f.write("--Query----------\n")
     f.write(sql)
-    f.write("--EndQuery-------")
+    f.write("\n--EndQuery-------")
     f.write('\n\n')
 
     f.close()

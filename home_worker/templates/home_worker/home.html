@@ -46,12 +46,29 @@
 
 <body>
     <br>
+    <br>
+    <br>
     {% if empty %}
         <p>There are currently no available jobs near you.</p>
     {% else %}
-        <h1>Current Available Requests</h1>
+        <h1>Currently Available Requests</h1>
         <br>
         {% render_table availableRequestTable %}
+    {% endif %}
+
+    <br>
+    <br>
+    <br>
+
+
+    <h1>Group Formation Requests</h1>
+    <br>
+    {% if emptyGRP %}
+    <p>There are currently no group requests for you.</p>
+    {% else %}
+        <p>The service providers below have requested your assistance in their tasks.</p>
+        <br>
+        {% render_table groupRequestTable %}
     {% endif %}
 
 

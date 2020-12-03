@@ -16,6 +16,21 @@
     <br>
     <br>
     <br>
+
+    <h1>Group Requests</h1>
+    <br>
+    {%if emptyGrp%}
+        <p>There are currently no group requests for you.</p>
+    {% else %}
+    <br>
+    <p>The service provider(s) below require two other workers to complete your task.</p>
+        {% render_table grouptable %}
+    {% endif %}
+    <br>
+    <br>
+    <br>
+
+
     <h1>Order History </h1>
     <br>
     {%if empty%}

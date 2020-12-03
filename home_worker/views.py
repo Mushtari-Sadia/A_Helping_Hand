@@ -62,6 +62,18 @@ class CurrentlyAvailableRequests(tables.Table):
     description = tables.Column(verbose_name='Description')
     request_time = tables.Column(verbose_name='Request Time')
     accept_button = TemplateColumn('<a class="btn btn-dark" href="{% url "acceptRequest"  record.req_no  %}">Accept</a>',verbose_name='Accept')
+    accept_grp_button = TemplateColumn('<a class="btn btn-dark" href="{% url "acceptRequestAndGroup"  record.req_no  %}">Accept and Ask for Group</a>',verbose_name='Ask for Group')
+
+    class Meta:
+        template_name = "django_tables2/bootstrap.html"
+
+class GroupRequests(tables.Table):
+    worker_name = tables.Column(verbose_name='Requested By')
+    customer_name = tables.Column(verbose_name='Customer Name')
+    customer_phone_number = tables.Column(verbose_name='Phone Number')
+    customer_address =  tables.Column(verbose_name='Address')
+    description = tables.Column(verbose_name='Description')
+    accept_button = TemplateColumn('<a class="btn btn-dark" href="{% url "acceptGroupRequest"  record.order_id  %}">Accept</a>',verbose_name='Accept Group Request')
 
     class Meta:
         template_name = "django_tables2/bootstrap.html"
@@ -80,7 +92,7 @@ def orders(request):
             first_name = row[0]
 
         data = []
-        #pending_data = []
+        group_data = []
         cur = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -134,22 +146,83 @@ def orders(request):
                     data_dict['request_time'] = str(request_time_hr) + " hour(s) ago"
                 else :
                     data_dict['request_time'] = str(request_time_min) + " minute(s) ago"
-                # print_all_sql("data_dict",data_dict)
                 data.append(data_dict)
-            # print_all_sql("all data", data)
             availableRequestTable = CurrentlyAvailableRequests(data)
-            # pendingtable = PendingTable(pending_data)
             empty = False
             if len(data) == 0 :
                 empty = True
-                return render(request, 'home_worker/home.html',{'title' : 'Home','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'first_name': first_name, 'empty' : empty})
-            else :
-                return render(request, 'home_worker/home.html',{'title' : 'Home','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'first_name': first_name, 'empty' : empty, 'availableRequestTable' : availableRequestTable})
+
+            # TODO FARDIN : ADD SQL BELOW TO MAKE GROUP REQUEST TABLE IN WORKER HOME
+            # REMEMBER TO SELECT WORKER_NAME WHO REQUESTED GROUP, CUSTOMER_NAME, customer_phone_number, customer_address
+            # description,ORDER_ID IN THAT ORDER
+            # UNCOMMENT LINE 161-170
+
+            sql = """"""
+            # print_all_sql(sql)
+            # for row in cursor.execute(sql):
+            #     data_dict = {}
+            #     data_dict['worker_name'] = row[0]
+            #     data_dict['customer_name'] = row[1]
+            #     data_dict['customer_phone_number'] = row[2]
+            #     data_dict['customer_address'] = row[3]
+            #     data_dict['description'] = row[4]
+            #     data_dict['order_id'] = row[5]
+            #     group_data.append(data_dict)
+            groupRequestTable = GroupRequests(group_data)
+            emptyGRP = False
+            if len(group_data) == 0:
+                emptyGRP = True
+
+
+            return render(request, 'home_worker/home.html',{'title' : 'Home','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'first_name': first_name, 'empty' : empty, 'emptyGRP' : emptyGRP, 'availableRequestTable' : availableRequestTable, 'groupRequestTable' : groupRequestTable})
     else :
         return redirect('home_customer-home')
 
 
 def acceptRequest(request, req_no):
+
+    if 'loggedIn' in request.session and request.session['loggedIn']==True:
+        if 'user_type' in request.session and request.session['user_type'] == "customer":
+            return redirect('home_customer-home')
+
+        if 'user_id' in request.session and request.session['user_id'] != -1:
+            worker_id = request.session['user_id']
+
+
+
+        print_all_sql("""INSERT INTO ORDER_INFO(TYPE, WORKER_ID,REQUEST_NO)
+                                VALUES( (SELECT TYPE
+                                FROM SERVICE_PROVIDER
+                                WHERE WORKER_ID =""" + str(worker_id) + """),""" + str(worker_id) +""",""" + str(req_no) +  """);"""
+                            )
+
+
+        connection.cursor().execute("""INSERT INTO ORDER_INFO(TYPE, WORKER_ID,REQUEST_NO)
+                                VALUES( (SELECT TYPE
+                                FROM SERVICE_PROVIDER
+                                WHERE WORKER_ID =""" + str(worker_id) + """),""" + str(worker_id) +""",""" + str(req_no) +  """);"""
+                            )
+
+
+        print_all_sql("""UPDATE SERVICE_REQUEST
+                SET ORDER_ID = (SELECT ORDER_ID
+                FROM ORDER_INFO
+                WHERE REQUEST_NO = """ + str(req_no) +""")
+                WHERE REQUEST_NO = """ + str(req_no) + """;""")
+
+
+        connection.cursor().execute(
+            """UPDATE SERVICE_REQUEST
+                SET ORDER_ID = (SELECT ORDER_ID
+                FROM ORDER_INFO
+                WHERE REQUEST_NO = """ + str(req_no) +""")
+                WHERE REQUEST_NO = """ + str(req_no) + """;"""
+        )
+        return redirect('home_worker-home')
+    else :
+        return redirect('home_customer-home')
+
+def acceptRequestAndGroup(request, req_no):
 
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "customer":
@@ -190,9 +263,19 @@ def acceptRequest(request, req_no):
                 WHERE REQUEST_NO = """ + str(req_no) + """;"""
         )
 
+        # TODO FARDIN : QUERY USING REQ_NO AND RETRIEVE ORDER_ID
+        #  1. accept and ask for grp--> i.Team Leader id  and order_id inserted in grpE/grpP/grpH
+        #                             ii. Team Leader id and order id inserted in group form table
+        #                             WHEN GROUP SIZE==2 :
+        #                                             Iii. INSERT TEAM_LEADER_ID IN ORDER INFO TABLE
+        #                             (USE TRIGGER FOR THIS)
+
+
+
         return redirect('home_worker-home')
     else :
         return redirect('home_customer-home')
+
 
 
 class CurrentlyRunningJobs(tables.Table):
@@ -278,6 +361,16 @@ def OrderHistory(request):
                 data_dict['End_time'] = end_time
 
                 jobHistory.append(data_dict)
+
+
+
+            #TODO FARDIN : MODIFY QUERY ( Currently running jobs er Query te add this →
+            # First check korte hobe oi job tay group ase kina :
+            # Order_id use kore group form e check korbe
+            # team leader id null kina. Jodi group size==2 hoy and group form.team leader id jodi null na hoy,
+            # tarmane group ase
+            # Erpor Check korte hobe group ta customer approve korse kina :
+            # order info table e team leader id ta null hoy that means oita customer approve korse.)
 
             print_all_sql("""
                         SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
@@ -380,3 +473,12 @@ def endTime(request,order_id) :
         return redirect('home_worker-orders')
     else:
         return redirect('login')
+
+def acceptGroupRequest(request,order_id) :
+
+    #TODO FARDIN :  ADD SQL (loggedin worker id corresponding order id te grpPEH e insert hobe.
+    # And trigger use kore group form table e automatically oi order id te group size increase 1,
+    # jodi group size 2 hoye jay tahole INSERT TEAM_LEADER_ID IN ORDER INFO TABLE)
+
+
+    return redirect('home_worker-orders')
