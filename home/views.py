@@ -42,11 +42,13 @@ def login(request):
                     id = row[0]
                     user_type = "customer"
                     #print(customer_id)
+                print("SELECT CUSTOMER_ID FROM CUSTOMER WHERE PHONE_NUMBER='" + phone_number + "' AND PASSWORD='" + password + "'")
                 for row in conn.cursor().execute(
                         "SELECT WORKER_ID FROM SERVICE_PROVIDER WHERE PHONE_NUMBER='" + phone_number + "' AND PASSWORD='" + password + "'"):
                     count_wor += 1
                     id = row[0]
                     user_type = "worker"
+                print("SELECT WORKER_ID FROM SERVICE_PROVIDER WHERE PHONE_NUMBER='" + phone_number + "' AND PASSWORD='" + password + "'")
                 #no one with that phone number or password exists
                 if count_cus == 0 and count_wor==0:
                     messages.warning(request, "Invalid phone number or password")

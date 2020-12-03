@@ -66,17 +66,31 @@ def register(request):
 
             count_cus = 0
             count_wor = 0
+
             for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'") :
                 count_cus += 1
+
+            print("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'")
+
             for row in conn.cursor().execute(
                     "SELECT * FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'"):
                 count_wor += 1
+
+            print("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'")
+
             # if user has entered a phone number that no one has entered before
             if count_cus == 0 and count_wor == 0:
                 conn.cursor().execute(
                     "INSERT INTO SERVICE_PROVIDER(type,phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
                     + " VALUES ('" + str(job_name) + "','" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
                     address + "'," + "TO_DATE('" + str(date_of_birth) + "', 'YYYY-MM-DD'))")
+
+                print("INSERT INTO SERVICE_PROVIDER(type,phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
+                    + " VALUES ('" + str(job_name) + "','" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
+                    address + "'," + "TO_DATE('" + str(date_of_birth) + "', 'YYYY-MM-DD'))")
+
+
+                print("SELECT WORKER_ID FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'")
                 for row in conn.cursor().execute(
                         "SELECT WORKER_ID FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'"):
                     worker_id = row[0]
@@ -123,6 +137,10 @@ def registerElectrician(request):
                 qualification = replaceNoneWithNull(qualification)
                 expertise = replaceNoneWithNull(expertise)
 
+                print("INSERT INTO ELECTRICIAN(WORKER_ID,LICENSE_INFO,YEARS_OF_EXPERIENCE,QUALIFICATION)"
+                    + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + str(
+                    yr_of_experience) + "','" + qualification + "')")
+
                 conn.cursor().execute(
                     "INSERT INTO ELECTRICIAN(WORKER_ID,LICENSE_INFO,YEARS_OF_EXPERIENCE,QUALIFICATION)"
                     + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + str(
@@ -132,8 +150,12 @@ def registerElectrician(request):
                     conn.cursor().execute(
                         "INSERT INTO AREA_OF_EXPERTISE(WORKER_ID,APPLIANCES_ID)"
                         + " VALUES ('" + str(worker_id) + "','"  + str(i) + "')")
+                    print("INSERT INTO AREA_OF_EXPERTISE(WORKER_ID,APPLIANCES_ID)"
+                        + " VALUES ('" + str(worker_id) + "','"  + str(i) + "')")
 
                 name = ""
+                print("SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'")
                 for row in conn.cursor().execute(
                         "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
                             worker_id) + "'"):
@@ -162,11 +184,18 @@ def registerHomeCleaner(request):
 
                 worker_id = request.session['user_id']
 
+                print("INSERT INTO HOME_CLEANER(WORKER_ID,NID )"
+                    + " VALUES ('" + str(worker_id) + "','" + str(NID_number) + "')")
+
                 conn.cursor().execute(
                     "INSERT INTO HOME_CLEANER(WORKER_ID,NID )"
                     + " VALUES ('" + str(worker_id) + "','" + str(NID_number) + "')")
 
                 name = ""
+
+                print("SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'")
+
                 for row in conn.cursor().execute(
                         "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
                             worker_id) + "'"):
@@ -197,9 +226,16 @@ def registerPestControlService(request):
 
                 worker_id = request.session['user_id']
 
+                print("INSERT INTO PEST_CONTROL(WORKER_ID,LICENSE_INFO,CHEMICAL_INFO )"
+                    + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + chemical_info + "')")
+
                 conn.cursor().execute(
                     "INSERT INTO PEST_CONTROL(WORKER_ID,LICENSE_INFO,CHEMICAL_INFO )"
                     + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + chemical_info + "')")
+
+
+                print("SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'")
 
                 name = ""
                 for row in conn.cursor().execute(
@@ -230,10 +266,19 @@ def registerPlumber(request):
 
                 worker_id = request.session['user_id']
 
+
+                print("INSERT INTO PLUMBER(WORKER_ID, YEARS_OF_EXPERIENCE )"
+                    + " VALUES ('" + str(worker_id) + "','" + str(
+                        yr_of_experience) + "')")
+
+
                 conn.cursor().execute(
                     "INSERT INTO PLUMBER(WORKER_ID, YEARS_OF_EXPERIENCE )"
                     + " VALUES ('" + str(worker_id) + "','" + str(
                         yr_of_experience) + "')")
+
+                print("SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'")
 
                 name = ""
                 for row in conn.cursor().execute(
@@ -269,10 +314,18 @@ def registerNurse(request):
 
                 worker_id = request.session['user_id']
 
+
+                print("INSERT INTO NURSE(WORKER_ID, CERTIFICATE_INFO, QUALIFICATION, YEARS_OF_EXPERIENCE )"
+                    + " VALUES ('" + str(worker_id) + "','" + certificate_info + "','" + qualification + "','" + str(
+                        yr_of_experience) + "')")
+
                 conn.cursor().execute(
                     "INSERT INTO NURSE(WORKER_ID, CERTIFICATE_INFO, QUALIFICATION, YEARS_OF_EXPERIENCE )"
                     + " VALUES ('" + str(worker_id) + "','" + certificate_info + "','" + qualification + "','" + str(
                         yr_of_experience) + "')")
+
+                print("SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'")
 
                 name = ""
                 for row in conn.cursor().execute(
@@ -307,9 +360,16 @@ def registerHouseShiftingAssistant(request):
 
                 worker_id = request.session['user_id']
 
+                print("INSERT INTO HOUSE_SHIFTING_ASSISTANT(WORKER_ID, DRIVING_LICENSE, CAR_TYPE, CAR_NO )"
+                    + " VALUES ('" + str(worker_id) + "','" + driving_license + "','" + car_type + "','" + car_no + "')")
+
                 conn.cursor().execute(
                     "INSERT INTO HOUSE_SHIFTING_ASSISTANT(WORKER_ID, DRIVING_LICENSE, CAR_TYPE, CAR_NO )"
                     + " VALUES ('" + str(worker_id) + "','" + driving_license + "','" + car_type + "','" + car_no + "')")
+
+
+                print("SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'")
 
                 name = ""
                 for row in conn.cursor().execute(
@@ -342,11 +402,18 @@ def registerCarpenter(request):
 
                 worker_id = request.session['user_id']
 
+                print("INSERT INTO CARPENTER(WORKER_ID,SHOP_NAME, SHOP_ADDRESS )"
+                    + " VALUES ('" + str(worker_id) + "','" + shop_name + "','" + shop_address + "')")
+
                 conn.cursor().execute(
                     "INSERT INTO CARPENTER(WORKER_ID,SHOP_NAME, SHOP_ADDRESS )"
                     + " VALUES ('" + str(worker_id) + "','" + shop_name + "','" + shop_address + "')")
 
                 name = ""
+
+                print("SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
+                            worker_id) + "'")
+
                 for row in conn.cursor().execute(
                         "SELECT (FIRST_NAME || ' ' || LAST_NAME) FROM SERVICE_PROVIDER WHERE WORKER_ID = '" + str(
                             worker_id) + "'"):

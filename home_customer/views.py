@@ -18,6 +18,7 @@ def home(request):
                 return redirect('home_worker-home')
             for row in cursor.execute("SELECT FIRST_NAME FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']) ):
                 first_name = row[0]
+            print("SELECT FIRST_NAME FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']))
             return render(request, 'home_customer/home.html',{'loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'first_name' : first_name})
         else :
             return redirect('login')
@@ -38,6 +39,7 @@ def profile(request):
             if rating==None :
                 rating = 0
 
+        print("SELECT FIRST_NAME || ' ' || LAST_NAME,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']))
 
         return render(request, 'home_customer/about.html',{'title' : 'Profile','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],
                                                            'name' : name,'phone_number' : phone_number,
@@ -83,6 +85,14 @@ def orders(request):
         if 'user_id' in request.session and request.session['user_id']!=-1:
             customer_id = request.session['user_id']
 
+            print("SELECT CUSTOMER_ID,TYPE,DESCRIPTION,TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'HR'),TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'min')" +
+                    "FROM SERVICE_REQUEST " +
+                    "WHERE ORDER_ID IS NULL " +
+                    "AND CUSTOMER_ID =" + str(customer_id) +
+                    "ORDER BY TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'min')" +
+                    " ;")
+
+
             for row in cursor.execute(
                     "SELECT CUSTOMER_ID,TYPE,DESCRIPTION,TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'HR'),TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'min')" +
                     "FROM SERVICE_REQUEST " +
@@ -102,6 +112,11 @@ def orders(request):
                     data_dict['Request_time'] = str(request_time_min) + " minute(s) ago"
                 # print(data_dict['Request_time'])
                 pending_data.append(data_dict)
+
+            print("SELECT S.CUSTOMER_ID, S.ORDER_ID, O.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME " +
+                    "FROM SERVICE_REQUEST S, ORDER_INFO O " +
+                    "WHERE S.ORDER_ID = O.ORDER_ID " +
+                    "AND S.CUSTOMER_ID =" + str(customer_id) + " ORDER BY O.START_TIME;")
 
             for row in cursor.execute(
                     "SELECT S.CUSTOMER_ID, S.ORDER_ID, O.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME " +
@@ -152,6 +167,8 @@ def request_service(request,type) :
                     connection.cursor().execute(
                             "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,DESCRIPTION,REQ_TIME)"
                             + " VALUES ('" + str(customer_id) + "','" + str(type) + "','" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
+                    print("INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,DESCRIPTION,REQ_TIME)"
+                            + " VALUES ('" + str(customer_id) + "','" + str(type) + "','" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");")
 
                     messages.success(request, "Your order was placed successfully.")
                     return redirect('home_customer-orders')
@@ -181,11 +198,12 @@ def request_electrician(request) :
                     description = form.cleaned_data.get('description')
                     req_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     description = replaceNoneWithNull(description)
-                    # print("INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
-                    #         + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) +"'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");")
                     connection.cursor().execute(
                             "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
                             + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) + ",'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
+
+                    print("INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
+                            + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) + ",'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");")
 
                     messages.success(request, "Your order was placed successfully.")
                     return redirect('home_customer-orders')
@@ -212,6 +230,7 @@ def rate(request, rating, Order_id) :
                 CALCRATING(""" + str(rating) + """,ID,'WORKER');
             END ;
             """
+            print(sql)
             connection.cursor().execute(sql)
             messages.success(request, "Thank you for your feedback.")
             return redirect('home_customer-orders')
@@ -224,6 +243,7 @@ def rate(request, rating, Order_id) :
                 CALCRATING(""" + str(rating) + """,ID,'CUSTOMER');
             END ;
             """
+            print(sql)
             connection.cursor().execute(sql)
             messages.success(request, "Thank you for your feedback.")
             return redirect('home_worker-orders')

@@ -27,8 +27,14 @@ def register(request):
 
             count_cus = 0
             count_wor = 0
+
+            print("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'")
+
             for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'"):
                 count_cus += 1
+
+            print( "SELECT * FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'")
+
             for row in conn.cursor().execute(
                     "SELECT * FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'"):
                 count_wor += 1
@@ -36,6 +42,10 @@ def register(request):
             if count_cus == 0 and count_wor == 0:
                 conn.cursor().execute(
                     "INSERT INTO Customer(phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
+                    + " VALUES ('" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
+                    address + "'," + "TO_DATE('" + str(date_of_birth) + "', 'YYYY-MM-DD'))")
+
+                print("INSERT INTO Customer(phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
                     + " VALUES ('" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
                     address + "'," + "TO_DATE('" + str(date_of_birth) + "', 'YYYY-MM-DD'))")
 

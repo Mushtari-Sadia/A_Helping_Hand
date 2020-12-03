@@ -78,10 +78,14 @@ EXCEPTION
 END;
 """
 connection.cursor().execute(calcrating)
+print(calcrating)
+
 execution = """
 BEGIN
 	CALCRATING(1,2,'customer');
 END ;
 """
 connection.cursor().execute(execution)
+print(execution)
 connection.cursor().execute(timediff)
+print(timediff)
