@@ -183,9 +183,10 @@ class ElectricianRegistrationForm(forms.Form):
 
 
 class HomeCleanerRegistrationForm(forms.Form):
-    NID_number = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your National Id No.'}),
-        max_length=42)
+    NID_number = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter your National Id No. '}),
+        required=False
+    )
     NID_number.label = "NID No."
 
 class PestControlServiceRegistrationForm(forms.Form):
@@ -270,7 +271,7 @@ class CarpenterRegistrationForm(forms.Form):
 
 
 class ServiceRequestForm(forms.Form):
-    new_list = JOB_LIST
+    new_list = JOB_LIST.copy()
     new_list.remove(('1', 'Electrician'))
     # type = forms.ChoiceField(
     #     widget=forms.Select,

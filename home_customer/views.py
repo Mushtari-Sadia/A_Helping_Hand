@@ -13,7 +13,7 @@ def home(request):
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
         first_name = ""
         if 'user_id' in request.session and request.session['user_id'] != -1 : # if a user is logged in
-            print(request.session['user_id'])
+            # print(request.session['user_id'])
             if 'user_type' in request.session and request.session['user_type'] == "worker" :
                 return redirect('home_worker-home')
             for row in cursor.execute("SELECT FIRST_NAME FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']) ):
@@ -100,7 +100,7 @@ def orders(request):
                     data_dict['Request_time'] = str(request_time_hr) + " hour(s) ago"
                 else :
                     data_dict['Request_time'] = str(request_time_min) + " minute(s) ago"
-                print(data_dict['Request_time'])
+                # print(data_dict['Request_time'])
                 pending_data.append(data_dict)
 
             for row in cursor.execute(
@@ -125,7 +125,7 @@ def orders(request):
             empty = True
         if len(pending_data) == 0 :
             emptyPending = True
-        print(data)
+        # print(data)
         ordertable = OrderTable(data)
         pendingtable = PendingTable(pending_data)
         return render(request, 'home_customer/orders.html',{'title' : 'Orders','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'], 'ordertable' : ordertable,'pendingtable' : pendingtable,'empty' : empty,'emptyPending' : emptyPending})
@@ -181,8 +181,8 @@ def request_electrician(request) :
                     description = form.cleaned_data.get('description')
                     req_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     description = replaceNoneWithNull(description)
-                    print("INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
-                            + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) +"'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");")
+                    # print("INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
+                    #         + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) +"'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");")
                     connection.cursor().execute(
                             "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
                             + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) + ",'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
@@ -201,7 +201,7 @@ def request_electrician(request) :
 
 
 def rate(request, rating, Order_id) :
-    print(rating,Order_id)
+    # print(rating,Order_id)
     if 'loggedIn' in request.session and request.session['loggedIn'] == True:
         if 'user_type' in request.session and request.session['user_type'] == "customer":
             sql = """

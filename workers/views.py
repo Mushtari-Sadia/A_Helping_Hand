@@ -52,14 +52,10 @@ def register(request):
             thana_name = form.cleaned_data.get('area_field')
             address = form.cleaned_data.get('address')
             job_field = form.cleaned_data.get('job_field')
+            job_name = job_field
             for i in JOB_LIST:
-                print(i[0])
-                print(job_field)
-                print(i[1])
-                print(type(job_field))
                 if int(i[0]) == int(job_field):
-                    job_field = i[1]
-                    print("after if job field : ",job_field)
+                    job_name = i[1]
                     break
 
 
@@ -79,7 +75,7 @@ def register(request):
             if count_cus == 0 and count_wor == 0:
                 conn.cursor().execute(
                     "INSERT INTO SERVICE_PROVIDER(type,phone_number,first_name,last_name,password,thana_name,address,date_of_birth)"
-                    + " VALUES ('" + str(job_field) + "','" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
+                    + " VALUES ('" + str(job_name) + "','" + phone_number + "','" + first_name + "','" + last_name + "','" + password1 + "','" + thana_name + "','" +
                     address + "'," + "TO_DATE('" + str(date_of_birth) + "', 'YYYY-MM-DD'))")
                 for row in conn.cursor().execute(
                         "SELECT WORKER_ID FROM SERVICE_PROVIDER WHERE PHONE_NUMBER = '" + phone_number + "'"):
@@ -168,7 +164,7 @@ def registerHomeCleaner(request):
 
                 conn.cursor().execute(
                     "INSERT INTO HOME_CLEANER(WORKER_ID,NID )"
-                    + " VALUES ('" + str(worker_id) + "','" + NID_number + "')")
+                    + " VALUES ('" + str(worker_id) + "','" + str(NID_number) + "')")
 
                 name = ""
                 for row in conn.cursor().execute(

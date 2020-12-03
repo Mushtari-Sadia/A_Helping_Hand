@@ -15,7 +15,7 @@ def home(request):
     if 'loggedIn' in request.session and 'user_id' in request.session:
         first_name = ""
         if request.session['user_id'] != -1 : # if a user is logged in
-            print(request.session['user_id'])
+            # print(request.session['user_id'])
             if 'user_type' in request.session and request.session['user_type'] == "customer" :
                 return redirect('home_customer-home')
             for row in cursor.execute("SELECT FIRST_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID = " + str(request.session['user_id']) ):
@@ -78,7 +78,7 @@ def orders(request):
         if 'user_id' in request.session and request.session['user_id']!=-1:
             worker_id = request.session['user_id']
 
-            print("This is " , worker_id)
+            # print("This is " , worker_id)
 
             for row in cursor.execute("""             
             SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
@@ -102,7 +102,7 @@ def orders(request):
 
                 data_dict['req_no'] = row[7]
 
-                print("THIS IS BEFORE TABLE ", row[7])
+                # print("THIS IS BEFORE TABLE ", row[7])
 
                 data_dict['request_time'] = str(request_time_min) + " minute(s) ago"
                 if float(request_time_hr)>=1 :
@@ -111,7 +111,7 @@ def orders(request):
                     data_dict['request_time'] = str(request_time_min) + " minute(s) ago"
                 # print("data_dict",data_dict)
                 data.append(data_dict)
-            print("all data", data)
+            # print("all data", data)
             availableRequestTable = CurrentlyAvailableRequests(data)
             # pendingtable = PendingTable(pending_data)
             empty = False
@@ -264,7 +264,7 @@ def OrderHistory(request):
 
         allJobHistory = JobHistory(jobHistory)
         currenttable = CurrentlyRunningJobs(currentJobs)
-        print(jobHistory)
+        # print(jobHistory)
         return render(request, 'home_worker/orderHistory.html', {'title': 'Home', 'loggedIn': request.session['loggedIn'],
                                                          'user_type': request.session['user_type'],'currenttable' : currenttable, 'historytable' : allJobHistory,'empcurrenttable' : empcurrentjobs,'emphistoryTable' : empjobhistory})
     else:
