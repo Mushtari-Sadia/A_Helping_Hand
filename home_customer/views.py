@@ -200,6 +200,19 @@ def approveGroup(request,order_id) :
     # Order info table er oi order id use kore
     # query kore
     # oi row er team leader id ta null kore dibe.)
+
+    if 'loggedIn' in request.session and request.session['loggedIn']==True:
+        if 'user_type' in request.session and request.session['user_type'] == "worker":
+            return redirect('home_worker-home')
+
+        if 'user_id' in request.session and request.session['user_id'] != -1:
+            worker_id = request.session['user_id']
+
+    data_dict ={}
+
+    connection.cursor().execute(""" UPDATE ORDER_INFO SET TEAM_LEADER_ID = NULL WHERE ORDER_ID = """ + str(order_id) + """ ;""")
+
+
     return redirect('home_customer-orders')
 
 

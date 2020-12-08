@@ -77,6 +77,39 @@ EXCEPTION
 
 END;
 """
+
+group_request_create = """
+CREATE OR REPLACE PROCEDURE CREATE_GROUP_REQUEST(REQ_NO IN NUMBER, USER_ID IN NUMBER)
+IS
+		WORKER_TYPE VARCHAR2(30);
+BEGIN
+		SELECT TYPE INTO WORKER_TYPE
+		FROM SERVICE_PROVIDER
+		WHERE WORKER_ID = USER_ID;
+		
+		IF WORKER_TYPE = 'Pest Control Service' THEN
+			INSERT INTO GROUP_PEST_CONTROL(ORDER_ID, TEAMLEADER_ID)
+      VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO = REQ_NO), USER_ID);
+			
+		ELSIF WORKER_TYPE = 'House Shifting Assistant' THEN
+			INSERT INTO GROUP_HOUSE_SHIFTING_ASSISTANT(ORDER_ID, TEAMLEADER_ID)
+      VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO = REQ_NO), USER_ID);
+			
+		ELSIF WORKER_TYPE = 'Electrician' THEN
+			INSERT INTO GROUP_ELECTRICIAN(ORDER_ID, TEAMLEADER_ID)
+      VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO = REQ_NO), USER_ID);
+		END IF;
+		
+EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			DBMS_OUTPUT.PUT_LINE('No data found.') ;
+		WHEN OTHERS THEN
+			DBMS_OUTPUT.PUT_LINE('Unknown Error') ;
+
+END ;
+"""
+
+
 connection.cursor().execute(calcrating)
 print_all_sql(calcrating)
 
@@ -89,3 +122,6 @@ connection.cursor().execute(execution)
 print_all_sql(execution)
 connection.cursor().execute(timediff)
 print_all_sql(timediff)
+
+connection.cursor().execute(group_request_create)
+print_all_sql(group_request_create)
