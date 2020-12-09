@@ -180,12 +180,6 @@ def orders(request):
             if len(data) == 0 :
                 empty = True
 
-            # TODO FARDIN (DONE) : ADD SQL BELOW TO MAKE GROUP REQUEST TABLE IN WORKER HOME
-            # REMEMBER TO SELECT WORKER_NAME WHO REQUESTED GROUP, CUSTOMER_NAME, customer_phone_number, customer_address
-            # description,ORDER_ID IN THAT ORDER
-            # UNCOMMENT LINE 161-170
-
-            sql = """"""
             print_all_sql("""
             SELECT s.FIRST_NAME || ' ' || s.LAST_NAME AS NAME, c.FIRST_NAME || ' ' ||c.LAST_NAME AS CUSTOMER_NAME, c.PHONE_NUMBER c.ADDRESS AS CUSTOMER_ADDRESS, a.DESCRIPTION, gf.ORDER_ID
             FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a, GROUP_FORM gf
@@ -308,14 +302,6 @@ def acceptRequestAndGroup(request, req_no):
                 WHERE REQUEST_NO = """ + str(req_no) + """;"""
         )
 
-        # TODO FARDIN : QUERY USING REQ_NO AND RETRIEVE ORDER_ID
-        #  1. accept and ask for grp--> i.Team Leader id  and order_id inserted in grpE/grpP/grpH
-        #                             ii. Team Leader id and order id inserted in group form table
-        #                             WHEN GROUP SIZE==2 :
-        #                                             Iii. INSERT TEAM_LEADER_ID IN ORDER INFO TABLE
-        #                             (USE TRIGGER FOR THIS)
-
-        data_dict_for_spType={}
 
         connection.cursor().execute(""" 
         BEGIN
@@ -424,13 +410,6 @@ def OrderHistory(request):
 
 
 
-            #TODO FARDIN : MODIFY QUERY ( Currently running jobs er Query te add this →
-            # First check korte hobe oi job tay group ase kina :
-            # Order_id use kore group form e check korbe
-            # team leader id null kina. Jodi group size==2 hoy and group form.team leader id jodi null na hoy,
-            # tarmane group ase
-            # Erpor Check korte hobe group ta customer approve korse kina :
-            # order info table e team leader id ta null hoy that means oita customer approve korse.)
 
             print_all_sql("""SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
                             FROM CUSTOMER C,ORDER_INFO O
@@ -525,10 +504,6 @@ def endTime(request,order_id) :
         return redirect('login')
 
 def acceptGroupRequest(request,order_id) :
-
-    #TODO FARDIN :  ADD SQL (loggedin worker id corresponding order id te grpPEH e insert hobe.
-    # And trigger use kore group form table e automatically oi order id te group size increase 1,
-    # jodi group size 2 hoye jay tahole INSERT TEAM_LEADER_ID IN ORDER INFO TABLE)
 
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "customer":

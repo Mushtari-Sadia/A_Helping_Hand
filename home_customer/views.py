@@ -70,7 +70,7 @@ class GroupTable(tables.Table):
     Team_leader_name = tables.Column(verbose_name='Requested By')
     Type = tables.Column(verbose_name='Service')
     worker_contact_no = tables.Column(verbose_name='Contact No.')
-    #Estimated_payment =
+    Estimated_payment = tables.Column(verbose_name='Estimated payment')
     approve_button = TemplateColumn('<a class="btn btn-dark" href="{% url "approveGroup"  record.order_id  %}">Approve</a>',verbose_name='Approve Request')
 
     class Meta:
@@ -132,13 +132,6 @@ def orders(request):
                 # print_all_sql(data_dict['Request_time'])
                 pending_data.append(data_dict)
 
-            # TODO FARDIN ADD QUERY FOR GROUP TABLE IN CUSTOMER END : SELECT ORDER_ID,TEAM_LEADER_NAME,TYPE,
-            # TEAM_LEADER_CONTACT_NO IN THAT ORDER
-            # (Currently pending requests and order history er majhkhane arekta table add hobe for group approval.
-            # Here, Query → Order info te jader order id created but team leader id not null)
-
-            #uncomment below lines
-            # sql = """"""
             print_all_sql("""
             SELECT o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
             FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
@@ -163,12 +156,17 @@ def orders(request):
                 data_dict['Team_leader_name'] = row[1]
                 data_dict['Type'] = row[2]
                 data_dict['worker_contact_no'] = row[3]
+
+                payment = None
+                for row2 in cursor.execute("""SELECT PAYMENT_PER_HOUR
+                FROM SERVICE_PROVIDER
+                GROUP BY PAYMENT_PER_HOUR,TYPE
+                HAVING TYPE = '"""+data_dict['Type']+"""';""") :
+                    payment = row2[0]
+                data_dict['Estimated_payment'] = str(payment*3) + ' Tk./hr'
+
                 group_data.append(data_dict)
 
-
-            # TODO FARDIN MODIFYQUERY
-            # (Order history table e jei query oitar shathe arekta condition add hobe.
-            # When order info.team leader id == null tokhoni order history te entry show korbe.
 
             print_all_sql("""
                     SELECT S.CUSTOMER_ID, S.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME,ROUND((SELECT PAYMENT_PER_HOUR FROM SERVICE_PROVIDER WHERE WORKER_ID=O.WORKER_ID)*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec')/3600,2) AS PAYMENT
@@ -179,7 +177,7 @@ def orders(request):
                     ORDER BY O.START_TIME;""")
 
             for row in cursor.execute("""
-                    SELECT S.CUSTOMER_ID, S.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME,ROUND((SELECT PAYMENT_PER_HOUR FROM SERVICE_PROVIDER WHERE WORKER_ID=O.WORKER_ID)*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec')/3600,2) AS PAYMENT
+                    SELECT S.CUSTOMER_ID, S.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME,ROUND((SELECT PAYMENT_PER_HOUR FROM SERVICE_PROVIDER WHERE WORKER_ID=O.WORKER_ID)*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec')/3600,2) AS PAYMENT,O.TEAM_LEADER_ID
                     FROM SERVICE_REQUEST S, ORDER_INFO O
                     WHERE S.ORDER_ID = O.ORDER_ID  
                     AND CHECK_GROUP_EXISTS_AND_APPROVED(O.ORDER_ID) = 1
@@ -187,6 +185,7 @@ def orders(request):
                     ORDER BY O.START_TIME;"""):
                 data_dict = {}
                 data_dict['Order_id'] = row[1]
+                print(data_dict['Order_id'])
                 data_dict['Type'] = row[2]
                 start_time = row[3]
                 end_time = row[4]
@@ -196,7 +195,14 @@ def orders(request):
                     end_time = end_time.strftime("%m/%d/%Y, %H:%M:%S")
                 data_dict['Start_time'] = start_time
                 data_dict['End_time'] = end_time
-                data_dict['Payment'] = row[5]
+                grp_has = row[6]
+                if grp_has == None :
+                    data_dict['Payment'] = row[5]
+                else :
+                    if row[5] != None :
+                        data_dict['Payment'] = 3*row[5]
+                    else :
+                        data_dict['Payment'] = row[5]
                 data.append(data_dict)
 
         if len(data) == 0 :
@@ -222,11 +228,6 @@ def orders(request):
 
 
 def approveGroup(request,order_id) :
-    #TODO FARDIN addquery (THIS IS THE APPROVE GROUP TABLE IN CUSTOMER END)
-    # (Approve e click korle →
-    # Order info table er oi order id use kore
-    # query kore
-    # oi row er team leader id ta null kore dibe.)
 
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
@@ -243,7 +244,7 @@ def approveGroup(request,order_id) :
     return redirect('home_customer-orders')
 
 
-#TODO SADIA : FIX NAVBAR NOT SHOWING LOGGED IN INFO
+
 def request_service(request,type) :
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
