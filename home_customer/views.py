@@ -135,14 +135,37 @@ def orders(request):
 
             #uncomment below lines
             # sql = """"""
-            # print_all_sql(sql)
-            # for row in cursor.execute(sql):
-            #     data_dict = {}
-            #     data_dict['order_id'] = row[0]
-            #     data_dict['Team_leader_name'] = row[1]
-            #     data_dict['Type'] = row[2]
-            #     data_dict['worker_contact_no'] = row[3]
-            # group_data.append(data_dict)
+            print_all_sql("""
+             SELECT	o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
+             
+             FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
+             
+             WHERE c.CUSTOMER_ID = """ + str(customer_id) + """
+             AND c.CUSTOMER_ID = sr.CUSTOMER_ID
+             AND sr.ORDER_ID = o.ORDER_ID
+             AND o.TEAM_LEADER_ID = sp.WORKER_ID
+             AND o.TEAM_LEADER_ID IS NOT NULL;
+             """)
+
+
+
+            for row in cursor.execute("""
+             SELECT	o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
+             
+             FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
+             
+             WHERE c.CUSTOMER_ID = """ + str(customer_id) + """
+             AND c.CUSTOMER_ID = sr.CUSTOMER_ID
+             AND sr.ORDER_ID = o.ORDER_ID
+             AND o.TEAM_LEADER_ID = sp.WORKER_ID
+             AND o.TEAM_LEADER_ID IS NOT NULL
+             """):
+                data_dict = {}
+                data_dict['order_id'] = row[0]
+                data_dict['Team_leader_name'] = row[1]
+                data_dict['Type'] = row[2]
+                data_dict['worker_contact_no'] = row[3]
+                group_data.append(data_dict)
 
 
             # TODO FARDIN MODIFYQUERY
@@ -155,10 +178,11 @@ def orders(request):
                     "AND S.CUSTOMER_ID =" + str(customer_id) + " ORDER BY O.START_TIME;")
 
             for row in cursor.execute(
-                    "SELECT S.CUSTOMER_ID, S.ORDER_ID, O.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME " +
-                    "FROM SERVICE_REQUEST S, ORDER_INFO O " +
-                    "WHERE S.ORDER_ID = O.ORDER_ID " +
-                    "AND S.CUSTOMER_ID =" + str(customer_id) + " ORDER BY O.START_TIME;")  :
+                    """SELECT S.CUSTOMER_ID, S.ORDER_ID, O.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME
+                    FROM SERVICE_REQUEST S, ORDER_INFO O
+                    WHERE S.ORDER_ID = O.ORDER_ID
+                    AND O.TEAM_LEADER_ID IS NULL
+                    AND S.CUSTOMER_ID =""" + str(customer_id) + """ ORDER BY O.START_TIME;""")  :
                 data_dict = {}
                 data_dict['Order_id'] = row[2]
                 data_dict['Type'] = row[3]
@@ -208,7 +232,7 @@ def approveGroup(request,order_id) :
         if 'user_id' in request.session and request.session['user_id'] != -1:
             worker_id = request.session['user_id']
 
-    data_dict ={}
+    #data_dict ={}
 
     connection.cursor().execute(""" UPDATE ORDER_INFO SET TEAM_LEADER_ID = NULL WHERE ORDER_ID = """ + str(order_id) + """ ;""")
 

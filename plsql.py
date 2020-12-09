@@ -109,6 +109,57 @@ EXCEPTION
 END ;
 """
 
+accept_group_req = """
+CREATE OR REPLACE PROCEDURE ACCEPTING_GROUP_REQUEST(ORD_ID IN NUMBER, USER_ID IN NUMBER)
+IS
+		WORKER_TYPE VARCHAR2(30);
+		GR_SIZE NUMBER;
+		TEAMLEADER NUMBER;
+BEGIN
+		SELECT TYPE INTO WORKER_TYPE
+		FROM SERVICE_PROVIDER
+		WHERE WORKER_ID = USER_ID;
+		
+		IF WORKER_TYPE = 'Electrician' THEN
+			UPDATE GROUP_ELECTRICIAN
+			SET WORKER_ID = USER_ID
+			WHERE ORDER_ID = ORD_ID;
+			
+		ELSIF WORKER_TYPE = 'Pest Control Service' THEN
+			UPDATE GROUP_PEST_CONTROL
+			SET WORKER_ID = USER_ID
+			WHERE ORDER_ID = ORD_ID;
+			
+		ELSIF WORKER_TYPE = 'House Shifting Assistant' THEN
+			UPDATE GROUP_HOUSE_SHIFTING_ASSISTANT
+			SET WORKER_ID = USER_ID
+			WHERE ORDER_ID = ORD_ID;
+			
+		END IF;
+		
+		UPDATE GROUP_FORM
+		SET GROUP_SIZE = GROUP_SIZE + 1
+		WHERE ORDER_ID = ORD_ID;
+		
+		SELECT GROUP_SIZE INTO GR_SIZE
+		FROM GROUP_FORM
+		WHERE ORDER_ID = ORD_ID;
+		
+		IF GR_SIZE = 2 THEN
+			SELECT TEAM_LEADER_ID INTO TEAMLEADER
+			FROM GROUP_FORM
+			WHERE ORDER_ID = ORD_ID;
+			
+			UPDATE ORDER_INFO
+			SET TEAM_LEADER_ID = TEAMLEADER
+			WHERE ORDER_ID = ORD_ID;
+			
+		END IF;
+
+END ;
+"""
+
+
 
 connection.cursor().execute(calcrating)
 print_all_sql(calcrating)
@@ -125,3 +176,6 @@ print_all_sql(timediff)
 
 connection.cursor().execute(group_request_create)
 print_all_sql(group_request_create)
+
+connection.cursor().execute(accept_group_req)
+print_all_sql(accept_group_req)
