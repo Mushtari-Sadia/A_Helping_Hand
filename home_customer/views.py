@@ -31,21 +31,24 @@ def profile(request):
         if 'user_type' in request.session and request.session['user_type'] == "worker":
             return redirect('home_worker-profile')
         for row in cursor.execute(
-                "SELECT FIRST_NAME || ' ' || LAST_NAME,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id'])):
+                "SELECT FIRST_NAME || ' ' || LAST_NAME,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING,RATED_BY FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id'])):
             name = row[0]
             phone_number = row[1]
             dob = row[2]
             thana = row[3]
             rating = row[4]
-            if rating==None :
+            rated_by = row[5]
+            if rating == None or rated_by == None:
                 rating = 0
+                rated_by = 0
 
-        print_all_sql("SELECT FIRST_NAME || ' ' || LAST_NAME,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']))
+        print_all_sql("SELECT FIRST_NAME || ' ' || LAST_NAME,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING,RATED_BY FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']))
 
         return render(request, 'home_customer/about.html',{'title' : 'Profile','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],
                                                            'name' : name,'phone_number' : phone_number,
                                                            'dob' : dob,'thana' : thana,
-                                                           'rating' : (float(rating)*100)/5})
+                                                           'rating' : (float(rating)*100)/5,
+                                                            'rated_by' : int(rated_by)})
     else :
         return redirect('home_customer-home')
 
@@ -137,30 +140,24 @@ def orders(request):
             #uncomment below lines
             # sql = """"""
             print_all_sql("""
-             SELECT	o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
-             
-             FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
-             
-             WHERE c.CUSTOMER_ID = """ + str(customer_id) + """
-             AND c.CUSTOMER_ID = sr.CUSTOMER_ID
-             AND sr.ORDER_ID = o.ORDER_ID
-             AND o.TEAM_LEADER_ID = sp.WORKER_ID
-             AND o.TEAM_LEADER_ID IS NOT NULL;
-             """)
+            SELECT o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
+            FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
+            WHERE c.CUSTOMER_ID = """+str(customer_id)+"""
+            AND c.CUSTOMER_ID = sr.CUSTOMER_ID
+            AND sr.ORDER_ID = o.ORDER_ID
+            AND sp.WORKER_ID = o.TEAM_LEADER_ID
+            AND o.TEAM_LEADER_ID = ANY( SELECT TEAM_LEADER_ID FROM GROUP_FORM WHERE CUSTOMER_APPROVED=0);""")
 
 
 
             for row in cursor.execute("""
-             SELECT	o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
-             
-             FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
-             
-             WHERE c.CUSTOMER_ID = """ + str(customer_id) + """
-             AND c.CUSTOMER_ID = sr.CUSTOMER_ID
-             AND sr.ORDER_ID = o.ORDER_ID
-             AND o.TEAM_LEADER_ID = sp.WORKER_ID
-             AND o.TEAM_LEADER_ID IS NOT NULL
-             """):
+            SELECT o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
+            FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
+            WHERE c.CUSTOMER_ID = """+str(customer_id)+"""
+            AND c.CUSTOMER_ID = sr.CUSTOMER_ID
+            AND sr.ORDER_ID = o.ORDER_ID
+            AND sp.WORKER_ID = o.TEAM_LEADER_ID
+            AND o.TEAM_LEADER_ID = ANY( SELECT TEAM_LEADER_ID FROM GROUP_FORM WHERE CUSTOMER_APPROVED=0);"""):
                 data_dict = {}
                 data_dict['order_id'] = row[0]
                 data_dict['Team_leader_name'] = row[1]
@@ -175,18 +172,18 @@ def orders(request):
 
             print_all_sql("""
                     SELECT S.CUSTOMER_ID, S.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME,ROUND((SELECT PAYMENT_PER_HOUR FROM SERVICE_PROVIDER WHERE WORKER_ID=O.WORKER_ID)*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec')/3600,2) AS PAYMENT
-                    FROM SERVICE_REQUEST S, ORDER_INFO O  
+                    FROM SERVICE_REQUEST S, ORDER_INFO O
                     WHERE S.ORDER_ID = O.ORDER_ID  
-                    AND O.TEAM_LEADER_ID IS NULL  
-                    AND S.CUSTOMER_ID = """+str(customer_id)+""" 
+                    AND CHECK_GROUP_EXISTS_AND_APPROVED(O.ORDER_ID) = 1
+                    AND S.CUSTOMER_ID = """+str(customer_id)+"""
                     ORDER BY O.START_TIME;""")
 
             for row in cursor.execute("""
                     SELECT S.CUSTOMER_ID, S.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME,ROUND((SELECT PAYMENT_PER_HOUR FROM SERVICE_PROVIDER WHERE WORKER_ID=O.WORKER_ID)*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec')/3600,2) AS PAYMENT
-                    FROM SERVICE_REQUEST S, ORDER_INFO O  
+                    FROM SERVICE_REQUEST S, ORDER_INFO O
                     WHERE S.ORDER_ID = O.ORDER_ID  
-                    AND O.TEAM_LEADER_ID IS NULL  
-                    AND S.CUSTOMER_ID = """+str(customer_id)+""" 
+                    AND CHECK_GROUP_EXISTS_AND_APPROVED(O.ORDER_ID) = 1
+                    AND S.CUSTOMER_ID = """+str(customer_id)+"""
                     ORDER BY O.START_TIME;"""):
                 data_dict = {}
                 data_dict['Order_id'] = row[1]
@@ -240,7 +237,7 @@ def approveGroup(request,order_id) :
 
     #data_dict ={}
 
-    connection.cursor().execute(""" UPDATE ORDER_INFO SET TEAM_LEADER_ID = NULL WHERE ORDER_ID = """ + str(order_id) + """ ;""")
+    connection.cursor().execute(""" UPDATE GROUP_FORM SET CUSTOMER_APPROVED = 1 WHERE ORDER_ID = """ + str(order_id) + """ ;""")
 
 
     return redirect('home_customer-orders')

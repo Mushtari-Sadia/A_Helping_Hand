@@ -34,23 +34,28 @@ def profile(request):
         if 'user_type' in request.session and request.session['user_type'] == "customer":
             return redirect('home_customer-profile')
 
-        print_all_sql("SELECT FIRST_NAME || ' ' || LAST_NAME,TYPE,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING FROM SERVICE_PROVIDER WHERE WORKER_ID = " + str(request.session['user_id']))
+        print_all_sql("SELECT FIRST_NAME || ' ' || LAST_NAME,TYPE,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING,RATED_BY FROM SERVICE_PROVIDER WHERE WORKER_ID = " + str(request.session['user_id']))
 
         for row in cursor.execute(
-                "SELECT FIRST_NAME || ' ' || LAST_NAME,TYPE,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING FROM SERVICE_PROVIDER WHERE WORKER_ID = " + str(request.session['user_id'])):
+                "SELECT FIRST_NAME || ' ' || LAST_NAME,TYPE,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING,RATED_BY FROM SERVICE_PROVIDER WHERE WORKER_ID = " + str(request.session['user_id'])):
             name = row[0]
             type = row[1]
             phone_number = row[2]
             dob = row[3]
             thana = row[4]
             rating = row[5]
-            if rating==None :
+            rated_by = row[6]
+            if rating==None or rated_by==None:
                 rating = 0
+                rated_by = 0
+
+
 
         return render(request, 'home_worker/about.html',{'title' : 'Profile','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],
                                                            'name' : name,'type' : type,'phone_number' : phone_number,
                                                            'dob' : dob,'thana' : thana,
-                                                           'rating' : (float(rating)*100)/5})
+                                                           'rating' : (float(rating)*100)/5,
+                                                            'rated_by' : int(rated_by)})
     else :
         return redirect('home_customer-home')
 
@@ -427,35 +432,25 @@ def OrderHistory(request):
             # Erpor Check korte hobe group ta customer approve korse kina :
             # order info table e team leader id ta null hoy that means oita customer approve korse.)
 
-            print_all_sql("""
-                        SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
-                        FROM CUSTOMER C,ORDER_INFO O, GROUP_FORM g
-                        WHERE C.CUSTOMER_ID = ANY(SELECT SR.CUSTOMER_ID
-                                                        FROM SERVICE_REQUEST SR
-                                                        WHERE SR.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID=""" + str(
-                            worker_id) + """))
+            print_all_sql("""SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
+                            FROM CUSTOMER C,ORDER_INFO O
+                            WHERE C.CUSTOMER_ID = ANY(SELECT SR.CUSTOMER_ID
+                                                                        FROM SERVICE_REQUEST SR
+                                                                        WHERE SR.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+"""))
                             AND O.ORDER_ID IS NOT NULL AND O.END_TIME IS NULL
-                            AND O.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID=""" + str(
-                            worker_id) + """)
-                            AND O.ORDER_ID = g.ORDER_ID
-                            AND g.GROUP_SIZE = 2
-                            AND O.TEAM_LEADER_ID IS NULL;""")
+                            AND O.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+""")
+                            AND CHECK_GROUP_EXISTS_AND_APPROVED(O.ORDER_ID)=1;""")
 
 
             for row in connection.cursor().execute(
-                        """
-                        SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
-                        FROM CUSTOMER C,ORDER_INFO O
-                        WHERE C.CUSTOMER_ID = ANY(SELECT SR.CUSTOMER_ID
-                                                        FROM SERVICE_REQUEST SR
-                                                        WHERE SR.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID=""" + str(
-                            worker_id) + """))
+                    """SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
+                            FROM CUSTOMER C,ORDER_INFO O
+                            WHERE C.CUSTOMER_ID = ANY(SELECT SR.CUSTOMER_ID
+                                                                        FROM SERVICE_REQUEST SR
+                                                                        WHERE SR.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+"""))
                             AND O.ORDER_ID IS NOT NULL AND O.END_TIME IS NULL
-                            AND O.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID=""" + str(
-                            worker_id) + """)
-
-            												;"""
-                ):
+                            AND O.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+""")
+                            AND CHECK_GROUP_EXISTS_AND_APPROVED(O.ORDER_ID)=1;"""):
 
                     data_dict = {}
                     data_dict['customer_name'] = row[0]

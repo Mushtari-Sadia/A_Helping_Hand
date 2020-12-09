@@ -120,21 +120,43 @@ BEGIN
 		SELECT TYPE INTO WORKER_TYPE
 		FROM SERVICE_PROVIDER
 		WHERE WORKER_ID = USER_ID;
+		
+		SELECT GROUP_SIZE INTO GR_SIZE
+		FROM GROUP_FORM
+		WHERE ORDER_ID = ORD_ID;
 
 		IF WORKER_TYPE = 'Electrician' THEN
-			UPDATE GROUP_ELECTRICIAN
-			SET WORKER_ID = USER_ID
-			WHERE ORDER_ID = ORD_ID;
+		    IF GR_SIZE = 0 THEN
+                UPDATE GROUP_ELECTRICIAN
+                SET WORKER_ID = USER_ID
+                WHERE ORDER_ID = ORD_ID;
+            ELSIF GR_SIZE = 1 THEN
+                UPDATE GROUP_ELECTRICIAN
+                SET WORKER_ID_2 = USER_ID
+                WHERE ORDER_ID = ORD_ID;
+            END IF;
 
 		ELSIF WORKER_TYPE = 'Pest Control Service' THEN
-			UPDATE GROUP_PEST_CONTROL
-			SET WORKER_ID = USER_ID
-			WHERE ORDER_ID = ORD_ID;
+			IF GR_SIZE = 0 THEN
+                UPDATE GROUP_PEST_CONTROL
+                SET WORKER_ID = USER_ID
+                WHERE ORDER_ID = ORD_ID;
+            ELSIF GR_SIZE = 1 THEN
+                UPDATE GROUP_PEST_CONTROL
+                SET WORKER_ID_2 = USER_ID
+                WHERE ORDER_ID = ORD_ID;
+            END IF;
 
 		ELSIF WORKER_TYPE = 'House Shifting Assistant' THEN
-			UPDATE GROUP_HOUSE_SHIFTING_ASSISTANT
-			SET WORKER_ID = USER_ID
-			WHERE ORDER_ID = ORD_ID;
+			IF GR_SIZE = 0 THEN
+                UPDATE GROUP_HOUSE_SHIFTING_ASSISTANT
+                SET WORKER_ID = USER_ID
+                WHERE ORDER_ID = ORD_ID;
+            ELSIF GR_SIZE = 1 THEN
+                UPDATE GROUP_HOUSE_SHIFTING_ASSISTANT
+                SET WORKER_ID_2 = USER_ID
+                WHERE ORDER_ID = ORD_ID;
+            END IF;
 
 		END IF;
 
@@ -209,6 +231,41 @@ BEGIN
 END ;
 /
 """
+set_customer_approved_grp_false_bydefault ="""
+CREATE OR REPLACE TRIGGER SET_CUSAPPROVEGRP_TO_FALSE
+BEFORE INSERT ON GROUP_FORM
+FOR EACH ROW
+BEGIN
+		:NEW.CUSTOMER_APPROVED := 0;
+		
+END ;
+/
+"""
+
+check_group_exists_and_approved_customer_order_history = """
+CREATE OR REPLACE FUNCTION CHECK_GROUP_EXISTS_AND_APPROVED(OID IN NUMBER)
+RETURN NUMBER IS
+GOID NUMBER;
+CUS NUMBER;
+BEGIN
+	SELECT ORDER_ID,CUSTOMER_APPROVED INTO GOID,CUS FROM GROUP_FORM WHERE ORDER_ID = OID;
+	IF GOID IS NULL THEN
+		RETURN 1;
+	ELSE
+		IF CUS=0 THEN
+			RETURN 0;
+		ELSIF CUS=1 THEN
+			RETURN 1;
+		END IF;
+	END IF;
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+		RETURN 1;
+END;
+/
+"""
+
+
 
 connection.cursor().execute(calcrating)
 print_all_sql(calcrating)
@@ -232,3 +289,10 @@ print_all_sql(accept_group_req)
 connection.cursor().execute(check_if_group_allowed)
 print_all_sql(check_if_group_allowed)
 
+
+connection.cursor().execute(set_customer_approved_grp_false_bydefault)
+print_all_sql(set_customer_approved_grp_false_bydefault)
+
+
+connection.cursor().execute(check_group_exists_and_approved_customer_order_history)
+print_all_sql(check_group_exists_and_approved_customer_order_history)
