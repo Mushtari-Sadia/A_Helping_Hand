@@ -1,6 +1,7 @@
 import os
 import django
 from django.db import connection
+from home.views import *
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'A_Helping_Hand.settings')
 django.setup()
@@ -108,7 +109,12 @@ EXCEPTION
 
 END ;
 """
+check_if_group_allowed = """
+CREATE OR REPLACE FUNCTION CHECK_IF_GROUP_ALLOWED(WID IN NUMBER)
+RETURN BOOLEAN IS
+	WORKER_TYPE VARCHAR2(30);
 
+<<<<<<< Updated upstream
 accept_group_req = """
 CREATE OR REPLACE PROCEDURE ACCEPTING_GROUP_REQUEST(ORD_ID IN NUMBER, USER_ID IN NUMBER)
 IS
@@ -161,6 +167,52 @@ END ;
 
 
 
+=======
+BEGIN
+	SELECT TYPE INTO WORKER_TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID = WID;
+	
+	IF LOWER(WORKER_TYPE) = LOWER('ELECTRICIAN') THEN
+			RETURN TRUE;
+	ELSIF LOWER(WORKER_TYPE) = LOWER('PEST CONTROL SERVICE') THEN
+			RETURN TRUE;
+	ELSIF LOWER(WORKER_TYPE) = LOWER('HOUSE SHIFTING ASSISTANT') THEN
+			RETURN TRUE;
+	ELSE
+			RETURN FALSE;
+	END IF;
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+		RETURN FALSE;
+		WHEN OTHERS THEN
+		RETURN FALSE;
+END ;
+/
+"""
+trigger_insert_payment = """
+CREATE OR REPLACE TRIGGER INSERT_PAYMENT
+BEFORE INSERT ON SERVICE_PROVIDER
+FOR EACH ROW
+BEGIN
+		IF :NEW.TYPE = 'Electrician' THEN
+			:NEW.PAYMENT_PER_HOUR := 300;
+		ELSIF :NEW.TYPE = 'Home Cleaner' THEN
+			:NEW.PAYMENT_PER_HOUR := 150;
+		ELSIF :NEW.TYPE = 'Pest Control Service' THEN
+			:NEW.PAYMENT_PER_HOUR := 500;
+		ELSIF :NEW.TYPE = 'Nurse' THEN
+			:NEW.PAYMENT_PER_HOUR := 600;
+		ELSIF :NEW.TYPE = 'Plumber' THEN
+			:NEW.PAYMENT_PER_HOUR := 150;
+		ELSIF :NEW.TYPE = 'House Shifting Assistant' THEN
+			:NEW.PAYMENT_PER_HOUR := 500;
+		ELSIF :NEW.TYPE = 'Carpenter' THEN
+			:NEW.PAYMENT_PER_HOUR := 300;
+		END IF;
+		
+END ;
+/
+"""
+>>>>>>> Stashed changes
 connection.cursor().execute(calcrating)
 print_all_sql(calcrating)
 
@@ -173,9 +225,13 @@ connection.cursor().execute(execution)
 print_all_sql(execution)
 connection.cursor().execute(timediff)
 print_all_sql(timediff)
-
 connection.cursor().execute(group_request_create)
 print_all_sql(group_request_create)
 
+<<<<<<< Updated upstream
 connection.cursor().execute(accept_group_req)
 print_all_sql(accept_group_req)
+=======
+connection.cursor().execute(check_if_group_allowed)
+print_all_sql(check_if_group_allowed)
+>>>>>>> Stashed changes

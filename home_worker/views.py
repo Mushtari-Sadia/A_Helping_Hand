@@ -55,7 +55,7 @@ def profile(request):
         return redirect('home_customer-home')
 
 
-class CurrentlyAvailableRequests(tables.Table):
+class CurrentlyAvailableRequestsWithGroup(tables.Table):
     customer_name = tables.Column(verbose_name='Customer Name')
     customer_phone_number = tables.Column(verbose_name='Phone Number')
     customer_address =  tables.Column(verbose_name='Address')
@@ -66,6 +66,18 @@ class CurrentlyAvailableRequests(tables.Table):
 
     class Meta:
         template_name = "django_tables2/bootstrap.html"
+
+class CurrentlyAvailableRequests(tables.Table):
+    customer_name = tables.Column(verbose_name='Customer Name')
+    customer_phone_number = tables.Column(verbose_name='Phone Number')
+    customer_address =  tables.Column(verbose_name='Address')
+    description = tables.Column(verbose_name='Description')
+    request_time = tables.Column(verbose_name='Request Time')
+    accept_button = TemplateColumn('<a class="btn btn-dark" href="{% url "acceptRequest"  record.req_no  %}">Accept</a>',verbose_name='Accept')
+
+    class Meta:
+        template_name = "django_tables2/bootstrap.html"
+
 
 class GroupRequests(tables.Table):
     worker_name = tables.Column(verbose_name='Requested By')
@@ -94,14 +106,32 @@ def orders(request):
         data = []
         group_data = []
         request_data = []
+        emptyGRP = False
         cur = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
         if 'user_id' in request.session and request.session['user_id']!=-1:
             worker_id = request.session['user_id']
 
+            sql = ""
+            for row in connection.cursor().execute('SELECT TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID=' + str(worker_id) +';'):
+                worker_type = row[0]
 
-            print_all_sql("""             
+            print(worker_type)
+            if worker_type == 'Electrician' :
+                sql = """SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
+                FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a
+                WHERE c.THANA_NAME= s.THANA_NAME
+                AND c.CUSTOMER_ID = ANY(SELECT a2.CUSTOMER_ID
+                                        FROM SERVICE_REQUEST a2,SERVICE_PROVIDER s2
+                                        WHERE a2.Order_id IS NULL AND LOWER(a2.TYPE)= LOWER(s2.TYPE) AND s2.WORKER_ID="""+str(worker_id)+""")
+                AND a.CUSTOMER_ID = c.CUSTOMER_ID
+                AND a.REQUEST_NO = ANY(SELECT a2.REQUEST_NO
+                                        FROM SERVICE_REQUEST a2,SERVICE_PROVIDER s2
+                                        WHERE a2.Order_id IS NULL AND LOWER(a2.TYPE)= LOWER(s2.TYPE) AND s2.WORKER_ID="""+str(worker_id)+""" AND a2.APPLIANCES_ID = ANY(SELECT APPLIANCES_ID FROM AREA_OF_EXPERTISE WHERE WORKER_ID="""+str(worker_id)+"""))
+                AND s.WORKER_ID="""+str(worker_id)+""";"""
+            else :
+                sql = """             
             SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
             FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a
             WHERE c.THANA_NAME= s.THANA_NAME
@@ -112,24 +142,10 @@ def orders(request):
             AND a.REQUEST_NO = ANY(SELECT a2.REQUEST_NO
                         FROM SERVICE_REQUEST a2,SERVICE_PROVIDER s2
                         WHERE a2.Order_id IS NULL AND LOWER(a2.TYPE)= LOWER(s2.TYPE) AND s2.WORKER_ID="""+str(worker_id) +""")
-            AND s.WORKER_ID="""+str(worker_id) +""";""")
+            AND s.WORKER_ID="""+str(worker_id) +""";"""
 
-
-
-
-
-            for row in cursor.execute("""             
-            SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
-            FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a
-            WHERE c.THANA_NAME= s.THANA_NAME
-            AND c.CUSTOMER_ID = ANY(SELECT a2.CUSTOMER_ID
-                        FROM SERVICE_REQUEST a2,SERVICE_PROVIDER s2
-                        WHERE a2.Order_id IS NULL AND LOWER(a2.TYPE)= LOWER(s2.TYPE) AND s2.WORKER_ID="""+str(worker_id) +""")
-            AND a.CUSTOMER_ID = c.CUSTOMER_ID
-            AND a.REQUEST_NO = ANY(SELECT a2.REQUEST_NO
-                        FROM SERVICE_REQUEST a2,SERVICE_PROVIDER s2
-                        WHERE a2.Order_id IS NULL AND LOWER(a2.TYPE)= LOWER(s2.TYPE) AND s2.WORKER_ID="""+str(worker_id) +""")
-            AND s.WORKER_ID="""+str(worker_id) +""";"""):
+            print_all_sql(sql)
+            for row in cursor.execute(sql):
                 data_dict = {}
                 data_dict['customer_name'] = row[0]
                 data_dict['customer_phone_number'] = row[1]
@@ -148,7 +164,13 @@ def orders(request):
                 else :
                     data_dict['request_time'] = str(request_time_min) + " minute(s) ago"
                 data.append(data_dict)
-            availableRequestTable = CurrentlyAvailableRequests(data)
+
+            group_is_allowed_for_this_user = connection.cursor().callfunc("CHECK_IF_GROUP_ALLOWED", bool, [worker_id])
+            if group_is_allowed_for_this_user == True :
+                availableRequestTable = CurrentlyAvailableRequestsWithGroup(data)
+            else :
+                availableRequestTable = CurrentlyAvailableRequests(data)
+                emptyGRP = True
             empty = False
             if len(data) == 0 :
                 empty = True
@@ -189,10 +211,8 @@ def orders(request):
                 data_dict['order_id'] = row[5]
                 group_data.append(data_dict)
             groupRequestTable = GroupRequests(group_data)
-            emptyGRP = False
             if len(group_data) == 0:
                 emptyGRP = True
-
 
             return render(request, 'home_worker/home.html',{'title' : 'Home','loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'first_name': first_name, 'empty' : empty, 'emptyGRP' : emptyGRP, 'availableRequestTable' : availableRequestTable, 'groupRequestTable' : groupRequestTable})
     else :
@@ -298,44 +318,6 @@ def acceptRequestAndGroup(request, req_no):
         END;
         """)
 
-        # for row in cursor.execute(""" SELECT TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID =""" + str(worker_id) + """;"""):
-        #     data_dict_for_spType['Service_provider_type'] = row[0]
-        #
-        #
-        # print_all_sql(""" SELECT TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID =""" + str(worker_id) + """;""")
-        # #type = row[0]
-        #
-        # #if type
-        #
-        # print("The service provider type is ", data_dict_for_spType)
-        #
-        # if(data_dict_for_spType['Service_provider_type'] == 'Pest Control Service'):
-        #     connection.cursor().execute(""" INSERT INTO GROUP_PEST_CONTROL(ORDER_ID, TEAMLEADER_ID)
-        #     VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO =""" + str(req_no) + """), """ + str(worker_id) + """);"""
-        #     )
-        #
-        #     print_all_sql(""" INSERT INTO GROUP_PEST_CONTROL(ORDER_ID, TEAMLEADER_ID)
-        #     VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO =""" + str(req_no) + """), """ + str(worker_id) + """);""")
-        #
-        # if (data_dict_for_spType['Service_provider_type'] == 'House Shifting Assistant'):
-        #     connection.cursor().execute(""" INSERT INTO GROUP_HOUSE_SHIFTING_ASSISTANT(ORDER_ID, TEAMLEADER_ID)
-        #             VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO =""" + str(req_no) + """), """ + str(
-        #         worker_id) + """);""")
-        #
-        #     print_all_sql(""" INSERT INTO GROUP_HOUSE_SHIFTING_ASSISTANT(ORDER_ID, TEAMLEADER_ID)
-        #             VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO =""" + str(req_no) + """), """ + str(
-        #         worker_id) + """);""")
-        #
-        #
-        # if (data_dict_for_spType['Service_provider_type'] == 'Electrician'):
-        #     connection.cursor().execute(""" INSERT INTO GROUP_ELECTRICIAN(ORDER_ID, TEAMLEADER_ID)
-        #             VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO =""" + str(req_no) + """), """ + str(
-        #         worker_id) + """);""")
-        #
-        #     print_all_sql(""" INSERT INTO GROUP_ELECTRICIAN(ORDER_ID, TEAMLEADER_ID)
-        #             VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO =""" + str(req_no) + """), """ + str(
-        #         worker_id) + """);""")
-
 
         connection.cursor().execute(""" INSERT INTO GROUP_FORM(ORDER_ID, GROUP_SIZE, TEAM_LEADER_ID)
         VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO = """ + str(req_no) + """ ), 0, """ + str(worker_id) + """);""")
@@ -367,12 +349,13 @@ class CurrentlyRunningJobs(tables.Table):
 
 
 class JobHistory(tables.Table):
+    Order_id = tables.Column(verbose_name='Order ID')
     customer_name = tables.Column(verbose_name='Name')
     customer_phone = tables.Column(verbose_name='Phone Number')
     customer_address = tables.Column(verbose_name='Address')
-    Order_id = tables.Column(verbose_name='Order ID')
     Start_time = tables.Column(verbose_name='Start Time')
     End_time = tables.Column(verbose_name='End Time')
+    Payment = tables.Column(verbose_name='Payment Tk.')
     Rating = TemplateColumn(verbose_name='Rate Customer',template_name='home_customer/rating.html')
 
     class Meta:
@@ -394,29 +377,25 @@ def OrderHistory(request):
 
 
             print_all_sql("""
-                SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
-                FROM CUSTOMER C,ORDER_INFO O
+                SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME,ROUND((s.PAYMENT_PER_HOUR*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec'))/3600,2)
+                FROM CUSTOMER C,ORDER_INFO O,SERVICE_PROVIDER S
                 WHERE C.CUSTOMER_ID = ANY(SELECT SR.CUSTOMER_ID
-												FROM SERVICE_REQUEST SR
-												WHERE SR.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+"""))
+                                FROM SERVICE_REQUEST SR
+                                WHERE SR.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+"""))
                 AND O.START_TIME IS NOT NULL AND O.END_TIME IS NOT NULL AND O.ORDER_ID IS NOT NULL
-                AND O.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+ str(worker_id) +""")
+                AND O.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+""")
+                AND S.WORKER_ID = """+str(worker_id)+""";""")
 
-												;""")
 
-
-            for row in connection.cursor().execute(
-                """
-                SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
-                FROM CUSTOMER C,ORDER_INFO O
+            for row in connection.cursor().execute("""
+                SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME,ROUND((s.PAYMENT_PER_HOUR*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec'))/3600,2)
+                FROM CUSTOMER C,ORDER_INFO O,SERVICE_PROVIDER S
                 WHERE C.CUSTOMER_ID = ANY(SELECT SR.CUSTOMER_ID
-												FROM SERVICE_REQUEST SR
-												WHERE SR.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+"""))
+                                FROM SERVICE_REQUEST SR
+                                WHERE SR.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+"""))
                 AND O.START_TIME IS NOT NULL AND O.END_TIME IS NOT NULL AND O.ORDER_ID IS NOT NULL
-                AND O.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+ str(worker_id) +""")
-
-												;"""
-            ) :
+                AND O.REQUEST_NO = ANY(SELECT O.REQUEST_NO FROM ORDER_INFO O WHERE O.WORKER_ID="""+str(worker_id)+""")
+                AND S.WORKER_ID = """+str(worker_id)+""";""") :
 
                 data_dict = {}
                 data_dict['customer_name'] = row[0]
@@ -432,6 +411,9 @@ def OrderHistory(request):
                     end_time = end_time.strftime("%m/%d/%Y, %H:%M:%S")
                 data_dict['Start_time'] = start_time
                 data_dict['End_time'] = end_time
+
+
+                data_dict['Payment'] = row[6]
 
                 jobHistory.append(data_dict)
 
@@ -499,7 +481,6 @@ def OrderHistory(request):
 
         allJobHistory = JobHistory(jobHistory)
         currenttable = CurrentlyRunningJobs(currentJobs)
-        # print_all_sql(jobHistory)
         return render(request, 'home_worker/orderHistory.html', {'title': 'Home', 'loggedIn': request.session['loggedIn'],
                                                          'user_type': request.session['user_type'],'currenttable' : currenttable, 'historytable' : allJobHistory,'empcurrenttable' : empcurrentjobs,'emphistoryTable' : empjobhistory})
     else:
