@@ -542,59 +542,6 @@ def acceptGroupRequest(request,order_id) :
         if 'user_id' in request.session and request.session['user_id'] != -1:
             worker_id = request.session['user_id']
 
-    #print_all_sql()
-
-    #connection.cursor().execute()
-
-    data_dict_for_spType = {}
-
-    # data_dict={}
-    #
-    # for row in cursor.execute(""" SELECT TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID =""" + str(worker_id) + """;"""):
-    #     data_dict_for_spType['Service_provider_type'] = row[0]
-    #
-    # if (data_dict_for_spType['Service_provider_type'] == 'Pest Control Service'):
-    #     connection.cursor().execute(""" UPDATE GROUP_PEST_CONTROL
-    #                                     SET WORKER_ID = """ + str(worker_id) +
-    #                                 """ WHERE ORDER_ID = """ + str(order_id) + """;"""
-    #                                 )
-    #
-    #     print_all_sql(""" UPDATE GROUP_PEST_CONTROL
-    #                                     SET WORKER_ID = """ + str(worker_id) +
-    #                                 """ WHERE ORDER_ID = """ + str(order_id) + """;""")
-    #
-    # if (data_dict_for_spType['Service_provider_type'] == 'House Shifting Assistant'):
-    #     connection.cursor().execute(""" UPDATE GROUP_HOUSE_SHIFTING_ASSISTANT
-    #                                     SET WORKER_ID = """ + str(worker_id) +
-    #                                 """ WHERE ORDER_ID = """ + str(order_id) + """;""")
-    #
-    #     print_all_sql(""" UPDATE GROUP_HOUSE_SHIFTING_ASSISTANT
-    #                                     SET WORKER_ID = """ + str(worker_id) +
-    #                                 """ WHERE ORDER_ID = """ + str(order_id) + """;""")
-    #
-    # if (data_dict_for_spType['Service_provider_type'] == 'Electrician'):
-    #     connection.cursor().execute(""" UPDATE GROUP_ELECTRICIAN
-    #                                     SET WORKER_ID = """ + str(worker_id) +
-    #                                 """ WHERE ORDER_ID = """ + str(order_id) + """;""")
-    #
-    #     print_all_sql(""" UPDATE GROUP_ELECTRICIAN
-    #                                     SET WORKER_ID = """ + str(worker_id) +
-    #                                 """ WHERE ORDER_ID = """ + str(order_id) + """;""")
-    #
-    # connection.cursor().execute(""" UPDATE GROUP_FORM
-    #                                 SET GROUP_SIZE = GROUP_SIZE + 1
-    #                                 WHERE ORDER_ID = """ + str(order_id) + """;""")
-    #
-    #
-    # for row in cursor.execute(""" SELECT GROUP_SIZE FROM GROUP_FORM WHERE ORDER_ID =""" + str(order_id) + """;"""):
-    #     data_dict['Group_size'] = row[0]
-    #
-    # if (data_dict['Group_size']==2):
-    #     for row in cursor.execute(""" SELECT TEAM_LEADER_ID FROM GROUP_FORM WHERE ORDER_ID =""" + str(order_id) + """;"""):
-    #         data_dict['Team_leader_id'] = row[0]
-    #
-    #     connection.cursor().execute(""" UPDATE ORDER_INFO SET TEAM_LEADER_ID = """ + str(data_dict['Team_leader_id']) +
-    #                                 """ WHERE ORDER_ID = """ + str(order_id) + """;""")
 
     connection.cursor().execute("""
     BEGIN

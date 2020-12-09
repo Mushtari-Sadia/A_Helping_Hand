@@ -173,19 +173,6 @@ def orders(request):
             # (Order history table e jei query oitar shathe arekta condition add hobe.
             # When order info.team leader id == null tokhoni order history te entry show korbe.
 
-<<<<<<< Updated upstream
-            print_all_sql("SELECT S.CUSTOMER_ID, S.ORDER_ID, O.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME " +
-                    "FROM SERVICE_REQUEST S, ORDER_INFO O " +
-                    "WHERE S.ORDER_ID = O.ORDER_ID " +
-                    "AND S.CUSTOMER_ID =" + str(customer_id) + " ORDER BY O.START_TIME;")
-
-            for row in cursor.execute(
-                    """SELECT S.CUSTOMER_ID, S.ORDER_ID, O.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME
-                    FROM SERVICE_REQUEST S, ORDER_INFO O
-                    WHERE S.ORDER_ID = O.ORDER_ID
-                    AND O.TEAM_LEADER_ID IS NULL
-                    AND S.CUSTOMER_ID =""" + str(customer_id) + """ ORDER BY O.START_TIME;""")  :
-=======
             print_all_sql("""
                     SELECT S.CUSTOMER_ID, S.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME,ROUND((SELECT PAYMENT_PER_HOUR FROM SERVICE_PROVIDER WHERE WORKER_ID=O.WORKER_ID)*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec')/3600,2) AS PAYMENT
                     FROM SERVICE_REQUEST S, ORDER_INFO O  
@@ -201,7 +188,6 @@ def orders(request):
                     AND O.TEAM_LEADER_ID IS NULL  
                     AND S.CUSTOMER_ID = """+str(customer_id)+""" 
                     ORDER BY O.START_TIME;"""):
->>>>>>> Stashed changes
                 data_dict = {}
                 data_dict['Order_id'] = row[1]
                 data_dict['Type'] = row[2]

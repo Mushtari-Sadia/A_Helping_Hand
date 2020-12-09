@@ -109,12 +109,7 @@ EXCEPTION
 
 END ;
 """
-check_if_group_allowed = """
-CREATE OR REPLACE FUNCTION CHECK_IF_GROUP_ALLOWED(WID IN NUMBER)
-RETURN BOOLEAN IS
-	WORKER_TYPE VARCHAR2(30);
 
-<<<<<<< Updated upstream
 accept_group_req = """
 CREATE OR REPLACE PROCEDURE ACCEPTING_GROUP_REQUEST(ORD_ID IN NUMBER, USER_ID IN NUMBER)
 IS
@@ -125,49 +120,50 @@ BEGIN
 		SELECT TYPE INTO WORKER_TYPE
 		FROM SERVICE_PROVIDER
 		WHERE WORKER_ID = USER_ID;
-		
+
 		IF WORKER_TYPE = 'Electrician' THEN
 			UPDATE GROUP_ELECTRICIAN
 			SET WORKER_ID = USER_ID
 			WHERE ORDER_ID = ORD_ID;
-			
+
 		ELSIF WORKER_TYPE = 'Pest Control Service' THEN
 			UPDATE GROUP_PEST_CONTROL
 			SET WORKER_ID = USER_ID
 			WHERE ORDER_ID = ORD_ID;
-			
+
 		ELSIF WORKER_TYPE = 'House Shifting Assistant' THEN
 			UPDATE GROUP_HOUSE_SHIFTING_ASSISTANT
 			SET WORKER_ID = USER_ID
 			WHERE ORDER_ID = ORD_ID;
-			
+
 		END IF;
-		
+
 		UPDATE GROUP_FORM
 		SET GROUP_SIZE = GROUP_SIZE + 1
 		WHERE ORDER_ID = ORD_ID;
-		
+
 		SELECT GROUP_SIZE INTO GR_SIZE
 		FROM GROUP_FORM
 		WHERE ORDER_ID = ORD_ID;
-		
+
 		IF GR_SIZE = 2 THEN
 			SELECT TEAM_LEADER_ID INTO TEAMLEADER
 			FROM GROUP_FORM
 			WHERE ORDER_ID = ORD_ID;
-			
+
 			UPDATE ORDER_INFO
 			SET TEAM_LEADER_ID = TEAMLEADER
 			WHERE ORDER_ID = ORD_ID;
-			
+
 		END IF;
 
 END ;
 """
 
-
-
-=======
+check_if_group_allowed = """
+CREATE OR REPLACE FUNCTION CHECK_IF_GROUP_ALLOWED(WID IN NUMBER)
+RETURN BOOLEAN IS
+	WORKER_TYPE VARCHAR2(30);
 BEGIN
 	SELECT TYPE INTO WORKER_TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID = WID;
 	
@@ -188,6 +184,7 @@ EXCEPTION
 END ;
 /
 """
+
 trigger_insert_payment = """
 CREATE OR REPLACE TRIGGER INSERT_PAYMENT
 BEFORE INSERT ON SERVICE_PROVIDER
@@ -212,7 +209,7 @@ BEGIN
 END ;
 /
 """
->>>>>>> Stashed changes
+
 connection.cursor().execute(calcrating)
 print_all_sql(calcrating)
 
@@ -228,10 +225,10 @@ print_all_sql(timediff)
 connection.cursor().execute(group_request_create)
 print_all_sql(group_request_create)
 
-<<<<<<< Updated upstream
+
 connection.cursor().execute(accept_group_req)
 print_all_sql(accept_group_req)
-=======
+
 connection.cursor().execute(check_if_group_allowed)
 print_all_sql(check_if_group_allowed)
->>>>>>> Stashed changes
+
