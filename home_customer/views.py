@@ -72,6 +72,7 @@ class GroupTable(tables.Table):
     worker_contact_no = tables.Column(verbose_name='Contact No.')
     Estimated_payment = tables.Column(verbose_name='Estimated payment')
     approve_button = TemplateColumn('<a class="btn btn-dark" href="{% url "approveGroup"  record.order_id  %}">Approve</a>',verbose_name='Approve Request')
+    reject_button = TemplateColumn('<a class="btn btn-danger" href="{% url "rejectGroup"  record.order_id  %}">Reject</a>',verbose_name='Reject Request')
 
     class Meta:
         template_name = "django_tables2/bootstrap.html"
@@ -241,6 +242,29 @@ def approveGroup(request,order_id) :
     #data_dict ={}
 
     connection.cursor().execute(""" UPDATE GROUP_FORM SET CUSTOMER_APPROVED = 1 WHERE ORDER_ID = """ + str(order_id) + """ ;""")
+
+
+    return redirect('home_customer-orders')
+
+def rejectGroup(request,order_id) :
+
+    if 'loggedIn' in request.session and request.session['loggedIn']==True:
+        if 'user_type' in request.session and request.session['user_type'] == "worker":
+            return redirect('home_worker-home')
+
+        if 'user_id' in request.session and request.session['user_id'] != -1:
+            worker_id = request.session['user_id']
+            connection.cursor().execute("""
+            BEGIN
+            REJECT_GROUP_REQUEST(""" + str(order_id) + """);
+            END;
+            /""")
+            print_all_sql("""
+            BEGIN
+            REJECT_GROUP_REQUEST(""" + str(order_id) + """);
+            END;
+            /""")
+            print("button works",order_id)
 
 
     return redirect('home_customer-orders')

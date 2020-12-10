@@ -271,6 +271,43 @@ END;
 /
 """
 
+reject_group_proc = """
+CREATE OR REPLACE PROCEDURE REJECT_GROUP_REQUEST(ORD_ID IN NUMBER)
+IS
+		WORKER_TYPE VARCHAR2(30);
+BEGIN
+		SELECT TYPE INTO WORKER_TYPE
+		FROM ORDER_INFO
+		WHERE ORDER_ID = ORD_ID;
+		
+		IF WORKER_TYPE = 'Electrician' THEN
+			DELETE FROM GROUP_ELECTRICIAN WHERE ORDER_ID = ORD_ID;
+			
+		ELSIF WORKER_TYPE = 'Pest Control Service' THEN
+			DELETE FROM GROUP_PEST_CONTROL WHERE ORDER_ID = ORD_ID;
+		
+		ELSIF WORKER_TYPE = 'House Shifting Assistant' THEN
+			DELETE FROM GROUP_HOUSE_SHIFTING_ASSISTANT WHERE ORDER_ID = ORD_ID;
+		
+		END IF;
+		
+		--DELETE FROM ORDER_INFO WHERE ORDER_ID = ORD_ID;
+		
+		DELETE FROM GROUP_FORM WHERE ORDER_ID = ORD_ID;
+		
+		UPDATE SERVICE_REQUEST SET ORDER_ID = NULL WHERE ORDER_ID = ORD_ID;
+		
+		DELETE FROM ORDER_INFO WHERE ORDER_ID = ORD_ID;
+		
+
+EXCEPTION
+		WHEN NO_DATA_FOUND THEN
+			DBMS_OUTPUT.PUT_LINE('No data found.') ;
+		WHEN OTHERS THEN
+			DBMS_OUTPUT.PUT_LINE('Unknown Error') ;
+
+END ;"""
+
 
 
 connection.cursor().execute(calcrating)
@@ -298,6 +335,9 @@ print_all_sql(check_if_group_allowed)
 
 connection.cursor().execute(set_customer_approved_grp_false_bydefault)
 print_all_sql(set_customer_approved_grp_false_bydefault)
+
+connection.cursor().execute(reject_group_proc)
+print_all_sql(reject_group_proc)
 
 
 connection.cursor().execute(check_group_exists_and_approved_customer_order_history)

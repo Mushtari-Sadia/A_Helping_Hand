@@ -189,7 +189,7 @@ def orders(request):
             WHERE s.WORKER_ID = gf.TEAM_LEADER_ID
             AND c.CUSTOMER_ID = a.CUSTOMER_ID
             AND a.ORDER_ID = gf.ORDER_ID
-            AND (SELECT sp1.TYPE FROM SERVICE_PROVIDER sp1 WHERE sp1.WORKER_ID = """+str(worker_id)+""") = ANY( SELECT sp.TYPE FROM GROUP_FORM g, SERVICE_PROVIDER sp WHERE g.TEAM_LEADER_ID = sp.WORKER_ID)
+            AND a.TYPE = (SELECT TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID = """+str(worker_id)+""")
             AND gf.GROUP_SIZE < 2 
             AND gf.TEAM_LEADER_ID != """+str(worker_id)+""" AND NVL(gf.WORKER_ID,0)!="""+str(worker_id)+""" AND NVL(gf.WORKER_ID_2,0) != """+str(worker_id)+""" AND s.THANA_NAME = (SELECT THANA_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID ="""+str(worker_id)+""");""")
 
@@ -200,9 +200,12 @@ def orders(request):
             WHERE s.WORKER_ID = gf.TEAM_LEADER_ID
             AND c.CUSTOMER_ID = a.CUSTOMER_ID
             AND a.ORDER_ID = gf.ORDER_ID
-            AND (SELECT sp1.TYPE FROM SERVICE_PROVIDER sp1 WHERE sp1.WORKER_ID = """+str(worker_id)+""") = ANY( SELECT sp.TYPE FROM GROUP_FORM g, SERVICE_PROVIDER sp WHERE g.TEAM_LEADER_ID = sp.WORKER_ID)
+            AND a.TYPE = (SELECT TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID = """+str(worker_id)+""")
             AND gf.GROUP_SIZE < 2 
-            AND gf.TEAM_LEADER_ID != """+str(worker_id)+""" AND NVL(gf.WORKER_ID,0)!="""+str(worker_id)+""" AND NVL(gf.WORKER_ID_2,0) != """+str(worker_id)+""" AND s.THANA_NAME = (SELECT THANA_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID ="""+str(worker_id)+""");"""):
+            AND gf.TEAM_LEADER_ID != """+str(worker_id)+""" AND NVL(gf.WORKER_ID,0)!="""+str(worker_id)+""" AND NVL(gf.WORKER_ID_2,0) != """+str(worker_id)+""" AND s.THANA_NAME = (SELECT THANA_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID ="""+str(worker_id)+""");"""
+
+
+):
                 data_dict = {}
                 data_dict['worker_name'] = row[0]
                 data_dict['customer_name'] = row[1]
