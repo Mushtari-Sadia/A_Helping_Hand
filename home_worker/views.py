@@ -405,7 +405,47 @@ def OrderHistory(request):
 
 
                 data_dict['Payment'] = row[6]
+                jobHistory.append(data_dict)
 
+            print_all_sql("""
+            SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,OI.ORDER_ID,OI.START_TIME,OI.END_TIME,ROUND((s.PAYMENT_PER_HOUR*TIMEDIFF2(OI.END_TIME,OI.START_TIME,'sec'))/3600,2)
+            FROM GROUP_FORM GF,ORDER_INFO OI,CUSTOMER C, SERVICE_REQUEST SR,SERVICE_PROVIDER S
+            WHERE OI.ORDER_ID = GF.ORDER_ID
+            AND SR.ORDER_ID=OI.ORDER_ID
+            AND C.CUSTOMER_ID=SR.CUSTOMER_ID
+            AND OI.TEAM_LEADER_ID = GF.TEAM_LEADER_ID
+            AND (GF.WORKER_ID = """+str(worker_id)+""" OR GF.WORKER_ID_2="""+str(worker_id)+""")
+            AND S.WORKER_ID = """+str(worker_id)+"""
+            AND OI.START_TIME IS NOT NULL AND OI.END_TIME IS NOT NULL
+            ;""")
+            for row in connection.cursor().execute("""
+            SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,OI.ORDER_ID,OI.START_TIME,OI.END_TIME,ROUND((s.PAYMENT_PER_HOUR*TIMEDIFF2(OI.END_TIME,OI.START_TIME,'sec'))/3600,2)
+            FROM GROUP_FORM GF,ORDER_INFO OI,CUSTOMER C, SERVICE_REQUEST SR,SERVICE_PROVIDER S
+            WHERE OI.ORDER_ID = GF.ORDER_ID
+            AND SR.ORDER_ID=OI.ORDER_ID
+            AND C.CUSTOMER_ID=SR.CUSTOMER_ID
+            AND OI.TEAM_LEADER_ID = GF.TEAM_LEADER_ID
+            AND (GF.WORKER_ID = """+str(worker_id)+""" OR GF.WORKER_ID_2="""+str(worker_id)+""")
+            AND S.WORKER_ID = """+str(worker_id)+"""
+            AND OI.START_TIME IS NOT NULL AND OI.END_TIME IS NOT NULL
+            ;"""):
+
+                data_dict = {}
+                data_dict['customer_name'] = row[0]
+                data_dict['customer_phone'] = row[1]
+                data_dict['customer_address'] = row[2]
+
+                data_dict['Order_id'] = row[3]
+                start_time = row[4]
+                end_time = row[5]
+                if start_time != None:
+                    start_time = start_time.strftime("%m/%d/%Y, %H:%M:%S")
+                if end_time != None:
+                    end_time = end_time.strftime("%m/%d/%Y, %H:%M:%S")
+                data_dict['Start_time'] = start_time
+                data_dict['End_time'] = end_time
+
+                data_dict['Payment'] = row[6]
                 jobHistory.append(data_dict)
 
 

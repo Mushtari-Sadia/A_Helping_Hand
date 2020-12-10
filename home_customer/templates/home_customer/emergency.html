@@ -1,0 +1,12 @@
+{% extends "customers/base.html" %}
+{% block content %}
+{% load render_table from django_tables2 %}
+
+    <div class="content-section">
+        <h1>Emergency Contacts In Your Area</h1>
+        <br>
+        {% render_table emergencytable %}
+        <br>
+    </div>
+
+{% endblock content %}

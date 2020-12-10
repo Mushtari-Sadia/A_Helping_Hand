@@ -276,7 +276,7 @@ def request_service(request,type) :
                     if int(i[0]) == int(type):
                         type = i[1]
                         break
-            return render(request, 'home_customer/request.html', {'title': 'Request','form': form,'type' : type})
+            return render(request, 'home_customer/request.html', {'loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'title': 'Request','form': form,'type' : type})
 
     else:
         return redirect('home_customer-home')
@@ -308,8 +308,8 @@ def request_electrician(request) :
 
             else:
                 form = ElectricianRequestForm()
-                type = "Electrician"
-            return render(request, 'home_customer/request.html', {'title': 'Request','form': form,'type':type})
+            type = "Electrician"
+            return render(request, 'home_customer/request.html', {'loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'title': 'Request','form': form,'type':type})
 
     else:
         return redirect('home_customer-home')
@@ -346,3 +346,81 @@ def rate(request, rating, Order_id) :
             return redirect('home_worker-orders')
     else:
         return redirect('login')
+
+class EmergencyTable(tables.Table):
+    Type_of_Emergency = tables.Column(verbose_name='Type of Emergency')
+    Contact_No = tables.Column(verbose_name='Contact No')
+    Thana = tables.Column(verbose_name='Thana')
+
+    class Meta:
+        template_name = "django_tables2/bootstrap.html"
+
+
+def request_emergency_contacts(request) :
+    if 'loggedIn' in request.session and request.session['loggedIn'] == True:
+        if 'user_type' in request.session and request.session['user_type'] == "worker":
+            return redirect('home_worker-home')
+        if 'user_id' in request.session and request.session['user_id'] != -1:
+            customer_id = request.session['user_id']
+            if request.method == 'POST':
+                form = EmergencyRequestForm(request.POST)
+                if form.is_valid():
+                    type = form.cleaned_data.get('type')
+                    for et in EMERGENCY_TYPE :
+                        if int(et[0]) == int(type) :
+                            type = et[1]
+                            break
+                    connection.cursor().execute(
+                        """INSERT INTO IN_AN_EMERGENCY(EMERGENCY_TYPE,CUSTOMER_ID) VALUES('""" + type + """',""" + str(
+                            customer_id) + """)""")
+
+                    print_all_sql(
+                        """INSERT INTO IN_AN_EMERGENCY(EMERGENCY_TYPE,CUSTOMER_ID) VALUES('""" + type + """',""" + str(
+                            customer_id) + """)""")
+                    return redirect('show_emergency')
+
+
+            else:
+                form = EmergencyRequestForm()
+            type = "Emergency"
+            return render(request, 'home_customer/request.html', {'loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'title': 'Request','form': form,'type':type})
+
+    else:
+        return redirect('home_customer-home')
+
+
+
+def emergency_show_table(request):
+    if 'loggedIn' in request.session and request.session['loggedIn'] == True:
+        if 'user_type' in request.session and request.session['user_type'] == "worker":
+            return redirect('home_worker-home')
+        if 'user_id' in request.session and request.session['user_id'] != -1:
+            customer_id = request.session['user_id']
+            emergencydata = []
+
+            print_all_sql("""
+            SELECT IAE.EMERGENCY_TYPE,EPN.PHONE_NUMBER,EPN.THANA_NAME
+            FROM IN_AN_EMERGENCY IAE,EMERGENCY_PHONE_NUMBER EPN,CUSTOMER C
+            WHERE EPN.THANA_NAME = C.THANA_NAME
+            AND IAE.EMERGENCY_TYPE = EPN.EMERGENCY_TYPE
+            AND C.CUSTOMER_ID = IAE.CUSTOMER_ID
+            AND IAE.CUSTOMER_ID = """+str(customer_id)+""";""")
+
+            for row in connection.cursor().execute("""
+            SELECT IAE.EMERGENCY_TYPE,EPN.PHONE_NUMBER,EPN.THANA_NAME
+            FROM IN_AN_EMERGENCY IAE,EMERGENCY_PHONE_NUMBER EPN,CUSTOMER C
+            WHERE EPN.THANA_NAME = C.THANA_NAME
+            AND IAE.EMERGENCY_TYPE = EPN.EMERGENCY_TYPE
+            AND C.CUSTOMER_ID = IAE.CUSTOMER_ID
+            AND IAE.CUSTOMER_ID = """+str(customer_id)+""";"""):
+                data_dict = {}
+                data_dict['Type_of_Emergency'] = row[0]
+                data_dict['Contact_No'] = row[1]
+                data_dict['Thana'] = row[2]
+                emergencydata.append(data_dict)
+            emergencytable = EmergencyTable(emergencydata)
+            return render(request, 'home_customer/emergency.html', {'loggedIn' : request.session['loggedIn'],'user_type' : request.session['user_type'],'title': 'Emergency Contacts','emergencytable' : emergencytable})
+
+
+    else:
+        return redirect('home_customer-home')

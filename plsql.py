@@ -12,14 +12,14 @@ timediff = """
     RETURN NUMBER IS
             TD INTERVAL DAY TO SECOND := TIME1 - TIME2;
             TS NUMBER;
-            
+
     BEGIN
-            
+
             TS := EXTRACT(DAY FROM TD)*86400;
             TS := TS + EXTRACT(HOUR FROM TD)*3600;
             TS := TS + EXTRACT(MINUTE FROM TD)*60;
             TS := TS + EXTRACT(SECOND FROM TD);
-            
+
             IF LOWER(UNIT)='sec' THEN
                 TS:= TS/1;
             ELSIF LOWER(UNIT)='min' THEN
@@ -29,16 +29,16 @@ timediff = """
             ELSIF LOWER(UNIT)='day' THEN
                 TS:=TS/86400;
             END IF;
-    
+
             RETURN ROUND(TS,0);
-            
+
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
                 RETURN NULL;
         WHEN OTHERS THEN
                 RETURN NULL;
-        
-    
+
+
     END;
 """
 calcrating = """
@@ -87,20 +87,20 @@ BEGIN
 		SELECT TYPE INTO WORKER_TYPE
 		FROM SERVICE_PROVIDER
 		WHERE WORKER_ID = USER_ID;
-		
+
 		IF WORKER_TYPE = 'Pest Control Service' THEN
 			INSERT INTO GROUP_PEST_CONTROL(ORDER_ID, TEAMLEADER_ID)
       VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO = REQ_NO), USER_ID);
-			
+
 		ELSIF WORKER_TYPE = 'House Shifting Assistant' THEN
 			INSERT INTO GROUP_HOUSE_SHIFTING_ASSISTANT(ORDER_ID, TEAMLEADER_ID)
       VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO = REQ_NO), USER_ID);
-			
+
 		ELSIF WORKER_TYPE = 'Electrician' THEN
 			INSERT INTO GROUP_ELECTRICIAN(ORDER_ID, TEAMLEADER_ID)
       VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO = REQ_NO), USER_ID);
 		END IF;
-		
+
 EXCEPTION
 		WHEN NO_DATA_FOUND THEN
 			DBMS_OUTPUT.PUT_LINE('No data found.') ;
@@ -120,7 +120,7 @@ BEGIN
 		SELECT TYPE INTO WORKER_TYPE
 		FROM SERVICE_PROVIDER
 		WHERE WORKER_ID = USER_ID;
-		
+
 		SELECT GROUP_SIZE INTO GR_SIZE
 		FROM GROUP_FORM
 		WHERE ORDER_ID = ORD_ID;
@@ -160,9 +160,15 @@ BEGIN
 
 		END IF;
 
-		UPDATE GROUP_FORM
-		SET GROUP_SIZE = GROUP_SIZE + 1
-		WHERE ORDER_ID = ORD_ID;
+        IF GR_SIZE = 0 THEN
+            UPDATE GROUP_FORM
+            SET GROUP_SIZE = GROUP_SIZE + 1,WORKER_ID = USER_ID
+            WHERE ORDER_ID = ORD_ID;
+        ELSIF GR_SIZE = 1 THEN
+            UPDATE GROUP_FORM
+            SET GROUP_SIZE = GROUP_SIZE + 1,WORKER_ID = USER_ID
+            WHERE ORDER_ID = ORD_ID;
+        END IF;
 
 		SELECT GROUP_SIZE INTO GR_SIZE
 		FROM GROUP_FORM
@@ -188,7 +194,7 @@ RETURN BOOLEAN IS
 	WORKER_TYPE VARCHAR2(30);
 BEGIN
 	SELECT TYPE INTO WORKER_TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID = WID;
-	
+
 	IF LOWER(WORKER_TYPE) = LOWER('ELECTRICIAN') THEN
 			RETURN TRUE;
 	ELSIF LOWER(WORKER_TYPE) = LOWER('PEST CONTROL SERVICE') THEN
@@ -227,7 +233,7 @@ BEGIN
 		ELSIF :NEW.TYPE = 'Carpenter' THEN
 			:NEW.PAYMENT_PER_HOUR := 300;
 		END IF;
-		
+
 END ;
 /
 """
@@ -237,7 +243,7 @@ BEFORE INSERT ON GROUP_FORM
 FOR EACH ROW
 BEGIN
 		:NEW.CUSTOMER_APPROVED := 0;
-		
+
 END ;
 /
 """
@@ -296,3 +302,93 @@ print_all_sql(set_customer_approved_grp_false_bydefault)
 
 connection.cursor().execute(check_group_exists_and_approved_customer_order_history)
 print_all_sql(check_group_exists_and_approved_customer_order_history)
+
+#
+# AREA_LIST_ALL = [
+# 'Adabar',
+# 'Azampur',
+# 'Badda',
+# 'Bangsal',
+# 'Bimanbandar',
+# 'Cantonment ',
+# 'Chowkbazar ',
+# 'Darus Salam ',
+# 'Demra ',
+# 'Dhanmondi',
+# 'Gendaria',
+# 'Gulshan',
+# 'Hazaribagh',
+# 'Kadamtali',
+# 'Kafrul',
+# 'Kalabagan',
+# 'Kamrangirchar',
+# 'Khilgaon',
+# 'Khilkhet',
+# 'Kotwali',
+# 'Lalbagh',
+# 'Mirpur Model',
+# 'Mohammadpur',
+# 'Motijheel',
+# 'New Market',
+# 'Pallabi',
+# 'Paltan',
+# 'Panthapath',
+# 'Ramna',
+# 'Rampura',
+# 'Sabujbagh',
+# 'Shah Ali',
+# 'Shahbag',
+# 'Sher-e-Bangla Nagar',
+# 'Shyampur',
+# 'Sutrapur',
+# 'Tejgaon Industrial Area',
+# 'Tejgaon',
+# 'Turag',
+# 'Uttar Khan',
+# 'Uttara ',
+# 'Vatara',
+# 'Wari']
+#
+# EMERGENCY_TYPE =[
+#     'Fire',
+#     'Ambulance',
+#     'Police'
+# ]
+#
+# PHONE_NUMBER_LIST_FIRE = [
+#     '01730002226',
+#     '01730002227',
+#     '01730002229',
+#     '01730002232',
+#     '01730002301'
+# ]
+#
+# PHONE_NUMBER_LIST_AMB = [
+#     '9556666',
+#     '9336611',
+#     '9127867',
+#     '9125420',
+#     '8014476'
+# ]
+#
+# PHONE_NUMBER_LIST_POL = [
+#     '01199867799',
+#     '01191001155',
+#     '01769058053',
+#     '01199883723',
+#     '01713373162'
+# ]
+# k=0
+# for i in AREA_LIST_ALL :
+#     for j in EMERGENCY_TYPE :
+#         if j == 'Fire' :
+#             phone_number = PHONE_NUMBER_LIST_FIRE[k]
+#             k = (k+1)%len(PHONE_NUMBER_LIST_FIRE)
+#         elif j == 'Ambulance' :
+#             phone_number = PHONE_NUMBER_LIST_AMB[k]
+#             k = (k+1)%len(PHONE_NUMBER_LIST_AMB)
+#         else :
+#             phone_number = PHONE_NUMBER_LIST_POL[k]
+#             k = (k + 1) % len(PHONE_NUMBER_LIST_POL)
+#         connection.cursor().execute("""
+#     INSERT INTO EMERGENCY_PHONE_NUMBER(EMERGENCY_TYPE,PHONE_NUMBER,THANA_NAME) VALUES('"""+j+"""','"""+phone_number+"""','"""+i+"""')""")

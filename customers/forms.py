@@ -295,3 +295,16 @@ class ElectricianRequestForm(forms.Form):
                               max_length=60, required=False)
     description.label = "Provide a short description of what you need. (Optional)"
 
+EMERGENCY_TYPE =(
+    (1,'Fire'),
+    (2,'Ambulance'),
+    (3,'Police')
+)
+class EmergencyRequestForm(forms.Form):
+
+    type = forms.ChoiceField(
+        widget=forms.Select,
+        choices=EMERGENCY_TYPE,
+    )
+    type.label = "What kind of emergency are you in?"
+

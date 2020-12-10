@@ -10,5 +10,7 @@ urlpatterns = [
     url(r'^request/(?P<type>\d+)$', views.request_service, name='service_request'),
     url(r'^approveGroup/(?P<order_id>\d+)$', views.approveGroup, name='approveGroup'),
     path('request/electrician/', views.request_electrician, name='electrician_request'),
+    path('request/emergency/', views.request_emergency_contacts, name='emergency_request'),
+    path('showemergency/', views.emergency_show_table, name='show_emergency'),
     url (r'^orders/(?P<rating>\d+)/order(?P<Order_id>\d+)/', views.rate, name='rate'),
 ]
