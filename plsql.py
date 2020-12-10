@@ -166,7 +166,7 @@ BEGIN
             WHERE ORDER_ID = ORD_ID;
         ELSIF GR_SIZE = 1 THEN
             UPDATE GROUP_FORM
-            SET GROUP_SIZE = GROUP_SIZE + 1,WORKER_ID = USER_ID
+            SET GROUP_SIZE = GROUP_SIZE + 1,WORKER_ID_2 = USER_ID
             WHERE ORDER_ID = ORD_ID;
         END IF;
 

@@ -134,23 +134,25 @@ def orders(request):
 
             print_all_sql("""
             SELECT o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
-            FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
+            FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp,GROUP_FORM GF
             WHERE c.CUSTOMER_ID = """+str(customer_id)+"""
             AND c.CUSTOMER_ID = sr.CUSTOMER_ID
             AND sr.ORDER_ID = o.ORDER_ID
             AND sp.WORKER_ID = o.TEAM_LEADER_ID
-            AND o.TEAM_LEADER_ID = ANY( SELECT TEAM_LEADER_ID FROM GROUP_FORM WHERE CUSTOMER_APPROVED=0);""")
+            AND o.ORDER_ID = GF.ORDER_ID
+            AND GF.CUSTOMER_APPROVED = 0;""")
 
 
 
             for row in cursor.execute("""
             SELECT o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
-            FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp
+            FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp,GROUP_FORM GF
             WHERE c.CUSTOMER_ID = """+str(customer_id)+"""
             AND c.CUSTOMER_ID = sr.CUSTOMER_ID
             AND sr.ORDER_ID = o.ORDER_ID
             AND sp.WORKER_ID = o.TEAM_LEADER_ID
-            AND o.TEAM_LEADER_ID = ANY( SELECT TEAM_LEADER_ID FROM GROUP_FORM WHERE CUSTOMER_APPROVED=0);"""):
+            AND o.ORDER_ID = GF.ORDER_ID
+            AND GF.CUSTOMER_APPROVED = 0;"""):
                 data_dict = {}
                 data_dict['order_id'] = row[0]
                 data_dict['Team_leader_name'] = row[1]

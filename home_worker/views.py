@@ -64,6 +64,7 @@ class CurrentlyAvailableRequestsWithGroup(tables.Table):
     customer_name = tables.Column(verbose_name='Customer Name')
     customer_phone_number = tables.Column(verbose_name='Phone Number')
     customer_address =  tables.Column(verbose_name='Address')
+    rating = tables.Column(verbose_name='Rating')
     description = tables.Column(verbose_name='Description')
     request_time = tables.Column(verbose_name='Request Time')
     accept_button = TemplateColumn('<a class="btn btn-dark" href="{% url "acceptRequest"  record.req_no  %}">Accept</a>',verbose_name='Accept')
@@ -76,6 +77,7 @@ class CurrentlyAvailableRequests(tables.Table):
     customer_name = tables.Column(verbose_name='Customer Name')
     customer_phone_number = tables.Column(verbose_name='Phone Number')
     customer_address =  tables.Column(verbose_name='Address')
+    rating = tables.Column(verbose_name='Rating')
     description = tables.Column(verbose_name='Description')
     request_time = tables.Column(verbose_name='Request Time')
     accept_button = TemplateColumn('<a class="btn btn-dark" href="{% url "acceptRequest"  record.req_no  %}">Accept</a>',verbose_name='Accept')
@@ -124,7 +126,7 @@ def orders(request):
 
             print(worker_type)
             if worker_type == 'Electrician' :
-                sql = """SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
+                sql = """SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,NVL(c.RATING,0),a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
                 FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a
                 WHERE c.THANA_NAME= s.THANA_NAME
                 AND c.CUSTOMER_ID = ANY(SELECT a2.CUSTOMER_ID
@@ -137,7 +139,7 @@ def orders(request):
                 AND s.WORKER_ID="""+str(worker_id)+""";"""
             else :
                 sql = """             
-            SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
+            SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,NVL(c.RATING,0),a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
             FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a
             WHERE c.THANA_NAME= s.THANA_NAME
             AND c.CUSTOMER_ID = ANY(SELECT a2.CUSTOMER_ID
@@ -155,11 +157,12 @@ def orders(request):
                 data_dict['customer_name'] = row[0]
                 data_dict['customer_phone_number'] = row[1]
                 data_dict['customer_address'] = row[2]
-                data_dict['description'] = row[3]
-                request_time_hr = row[5]
-                request_time_min = row[6]
+                data_dict['rating'] = float(row[3])
+                data_dict['description'] = row[4]
+                request_time_hr = row[6]
+                request_time_min = row[7]
 
-                data_dict['req_no'] = row[7]
+                data_dict['req_no'] = row[8]
 
                 # print_all_sql("THIS IS BEFORE TABLE ", row[7])
 
@@ -181,13 +184,14 @@ def orders(request):
                 empty = True
 
             print_all_sql("""
-            SELECT s.FIRST_NAME || ' ' || s.LAST_NAME AS NAME, c.FIRST_NAME || ' ' ||c.LAST_NAME AS CUSTOMER_NAME, c.PHONE_NUMBER c.ADDRESS AS CUSTOMER_ADDRESS, a.DESCRIPTION, gf.ORDER_ID
+            SELECT s.FIRST_NAME || ' ' || s.LAST_NAME AS NAME, c.FIRST_NAME || ' ' ||c.LAST_NAME AS CUSTOMER_NAME, c.PHONE_NUMBER, c.ADDRESS AS CUSTOMER_ADDRESS, a.DESCRIPTION, gf.ORDER_ID
             FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a, GROUP_FORM gf
             WHERE s.WORKER_ID = gf.TEAM_LEADER_ID
             AND c.CUSTOMER_ID = a.CUSTOMER_ID
             AND a.ORDER_ID = gf.ORDER_ID
-            AND (SELECT TYPE FROM SERVICE_PROVIDER WHERE WORKER_ID = """ + str(worker_id) +
-            """) = ANY( SELECT TYPE FROM GROUP_FORM g, SERVICE_PROVIDER sp WHERE g.TEAM_LEADER_ID = sp.WORKER_ID); """)
+            AND (SELECT sp1.TYPE FROM SERVICE_PROVIDER sp1 WHERE sp1.WORKER_ID = """+str(worker_id)+""") = ANY( SELECT sp.TYPE FROM GROUP_FORM g, SERVICE_PROVIDER sp WHERE g.TEAM_LEADER_ID = sp.WORKER_ID)
+            AND gf.GROUP_SIZE < 2 
+            AND gf.TEAM_LEADER_ID != """+str(worker_id)+""" AND NVL(gf.WORKER_ID,0)!="""+str(worker_id)+""" AND NVL(gf.WORKER_ID_2,0) != """+str(worker_id)+""" AND s.THANA_NAME = (SELECT THANA_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID ="""+str(worker_id)+""");""")
 
 
             for row in cursor.execute("""
@@ -196,11 +200,9 @@ def orders(request):
             WHERE s.WORKER_ID = gf.TEAM_LEADER_ID
             AND c.CUSTOMER_ID = a.CUSTOMER_ID
             AND a.ORDER_ID = gf.ORDER_ID
-            AND (SELECT sp1.TYPE FROM SERVICE_PROVIDER sp1 WHERE sp1.WORKER_ID = """ + str(worker_id) +
-            """) = ANY( SELECT sp.TYPE FROM GROUP_FORM g, SERVICE_PROVIDER sp WHERE g.TEAM_LEADER_ID = sp.WORKER_ID)
+            AND (SELECT sp1.TYPE FROM SERVICE_PROVIDER sp1 WHERE sp1.WORKER_ID = """+str(worker_id)+""") = ANY( SELECT sp.TYPE FROM GROUP_FORM g, SERVICE_PROVIDER sp WHERE g.TEAM_LEADER_ID = sp.WORKER_ID)
             AND gf.GROUP_SIZE < 2 
-            AND gf.TEAM_LEADER_ID != """ + str(worker_id) +
-            """ AND s.THANA_NAME = (SELECT THANA_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID =""" + str(worker_id) + """);"""):
+            AND gf.TEAM_LEADER_ID != """+str(worker_id)+""" AND NVL(gf.WORKER_ID,0)!="""+str(worker_id)+""" AND NVL(gf.WORKER_ID_2,0) != """+str(worker_id)+""" AND s.THANA_NAME = (SELECT THANA_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID ="""+str(worker_id)+""");"""):
                 data_dict = {}
                 data_dict['worker_name'] = row[0]
                 data_dict['customer_name'] = row[1]
