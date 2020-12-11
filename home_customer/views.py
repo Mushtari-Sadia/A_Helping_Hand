@@ -104,7 +104,7 @@ def orders(request):
 
         if 'user_id' in request.session and request.session['user_id']!=-1:
             customer_id = request.session['user_id']
-
+            #pending table
             print_all_sql("SELECT CUSTOMER_ID,TYPE,DESCRIPTION,TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'HR'),TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'min')" +
                     "FROM SERVICE_REQUEST " +
                     "WHERE ORDER_ID IS NULL " +
@@ -144,7 +144,7 @@ def orders(request):
             AND GF.CUSTOMER_APPROVED = 0;""")
 
 
-
+            #order table
             for row in cursor.execute("""
             SELECT o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
             FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp,GROUP_FORM GF

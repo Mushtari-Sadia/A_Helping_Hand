@@ -125,6 +125,7 @@ def orders(request):
                 worker_type = row[0]
 
             print(worker_type)
+            #group table
             if worker_type == 'Electrician' :
                 sql = """SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,NVL(c.RATING,0),a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
                 FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a
