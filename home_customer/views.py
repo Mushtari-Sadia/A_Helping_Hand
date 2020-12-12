@@ -17,6 +17,7 @@ def home(request):
             # print_all_sql(request.session['user_id'])
             if 'user_type' in request.session and request.session['user_type'] == "worker" :
                 return redirect('home_worker-home')
+            #TODO HOME-CUSTOMER WELCOME
             for row in cursor.execute("SELECT FIRST_NAME FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']) ):
                 first_name = row[0]
             print_all_sql("SELECT FIRST_NAME FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id']))
@@ -30,6 +31,7 @@ def profile(request):
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "worker":
             return redirect('home_worker-profile')
+        # TODO PROFILE
         for row in cursor.execute(
                 "SELECT FIRST_NAME || ' ' || LAST_NAME,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING,RATED_BY FROM CUSTOMER WHERE CUSTOMER_ID = " + str(request.session['user_id'])):
             name = row[0]
@@ -104,7 +106,9 @@ def orders(request):
 
         if 'user_id' in request.session and request.session['user_id']!=-1:
             customer_id = request.session['user_id']
-            #pending table
+
+            #TODO CUSTOMER CURRENT PENDING REQUESTS
+
             print_all_sql("SELECT CUSTOMER_ID,TYPE,DESCRIPTION,TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'HR'),TIMEDIFF2( TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS'), REQ_TIME, 'min')" +
                     "FROM SERVICE_REQUEST " +
                     "WHERE ORDER_ID IS NULL " +
@@ -144,7 +148,8 @@ def orders(request):
             AND GF.CUSTOMER_APPROVED = 0;""")
 
 
-            #order table
+            #TODO CUSTOMER GROUP APPROVAL TABLE
+
             for row in cursor.execute("""
             SELECT o.ORDER_ID, sp.FIRST_NAME || ' ' || sp.LAST_NAME AS NAME, sp.TYPE, sp.PHONE_NUMBER
             FROM CUSTOMER c, SERVICE_REQUEST sr, ORDER_INFO o, SERVICE_PROVIDER sp,GROUP_FORM GF
@@ -160,6 +165,7 @@ def orders(request):
                 data_dict['Type'] = row[2]
                 data_dict['worker_contact_no'] = row[3]
 
+                #TODO CUSTOMER GROUP ESTIMATED PAYMENT
                 payment = None
                 for row2 in cursor.execute("""SELECT PAYMENT_PER_HOUR
                 FROM SERVICE_PROVIDER
@@ -170,9 +176,11 @@ def orders(request):
 
                 group_data.append(data_dict)
 
-
+            #TODO CUSTOMER ORDER HISTORY
             print_all_sql("""
-                    SELECT S.CUSTOMER_ID, S.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME,ROUND((SELECT PAYMENT_PER_HOUR FROM SERVICE_PROVIDER WHERE WORKER_ID=O.WORKER_ID)*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec')/3600,2) AS PAYMENT
+                    SELECT S.CUSTOMER_ID, S.ORDER_ID,O.TYPE,O.START_TIME,O.END_TIME,
+                    ROUND((SELECT PAYMENT_PER_HOUR 
+                           FROM SERVICE_PROVIDER WHERE WORKER_ID=O.WORKER_ID)*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec')/3600,2) AS PAYMENT
                     FROM SERVICE_REQUEST S, ORDER_INFO O
                     WHERE S.ORDER_ID = O.ORDER_ID  
                     AND CHECK_GROUP_EXISTS_AND_APPROVED(O.ORDER_ID) = 1
@@ -240,7 +248,7 @@ def approveGroup(request,order_id) :
             worker_id = request.session['user_id']
 
     #data_dict ={}
-
+    #TODO CUSTOMER GROUP APPROVE BUTTON
     connection.cursor().execute(""" UPDATE GROUP_FORM SET CUSTOMER_APPROVED = 1 WHERE ORDER_ID = """ + str(order_id) + """ ;""")
 
 
@@ -254,6 +262,8 @@ def rejectGroup(request,order_id) :
 
         if 'user_id' in request.session and request.session['user_id'] != -1:
             worker_id = request.session['user_id']
+
+            #TODO CUSTOMER REJECT GROUP
             connection.cursor().execute("""
             BEGIN
             REJECT_GROUP_REQUEST(""" + str(order_id) + """);
@@ -287,6 +297,7 @@ def request_service(request,type) :
                             type = i[1]
                             break
                     description = replaceNoneWithNull(description)
+                    #TODO CUSTOMER REQUEST SERVICE
                     connection.cursor().execute(
                             "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,DESCRIPTION,REQ_TIME)"
                             + " VALUES ('" + str(customer_id) + "','" + str(type) + "','" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
@@ -321,6 +332,7 @@ def request_electrician(request) :
                     description = form.cleaned_data.get('description')
                     req_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     description = replaceNoneWithNull(description)
+                    # TODO CUSTOMER REQUEST ELECTRICIAN
                     connection.cursor().execute(
                             "INSERT INTO SERVICE_REQUEST(CUSTOMER_ID,TYPE,APPLIANCES_ID,DESCRIPTION,REQ_TIME)"
                             + " VALUES ('" + str(customer_id) + "','Electrician',"+ str(type) + ",'" + str(description) + "'," + "TO_TIMESTAMP('" + str(req_time) + "','YYYY-MM-DD HH24:MI:SS')" + ");" )
@@ -345,6 +357,7 @@ def rate(request, rating, Order_id) :
     # print_all_sql(rating,Order_id)
     if 'loggedIn' in request.session and request.session['loggedIn'] == True:
         if 'user_type' in request.session and request.session['user_type'] == "customer":
+            # TODO CUSTOMER RATE A WORKER
             sql = """
             DECLARE
             ID NUMBER;
@@ -358,6 +371,7 @@ def rate(request, rating, Order_id) :
             messages.success(request, "Thank you for your feedback.")
             return redirect('home_customer-orders')
         if 'user_type' in request.session and request.session['user_type'] == "worker":
+            # TODO WORKER RATE A WORKER
             sql = """
             DECLARE
             ID NUMBER;
@@ -396,6 +410,7 @@ def request_emergency_contacts(request) :
                         if int(et[0]) == int(type) :
                             type = et[1]
                             break
+                    # TODO CUSTOMER REQUEST EMERGENCY
                     connection.cursor().execute(
                         """INSERT INTO IN_AN_EMERGENCY(EMERGENCY_TYPE,CUSTOMER_ID) VALUES('""" + type + """',""" + str(
                             customer_id) + """)""")
@@ -423,6 +438,8 @@ def emergency_show_table(request):
         if 'user_id' in request.session and request.session['user_id'] != -1:
             customer_id = request.session['user_id']
             emergencydata = []
+
+            # TODO CUSTOMER EMERGENCY SHOW TABLE
 
             print_all_sql("""
             SELECT IAE.EMERGENCY_TYPE,EPN.PHONE_NUMBER,EPN.THANA_NAME

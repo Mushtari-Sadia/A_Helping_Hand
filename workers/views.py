@@ -6,16 +6,6 @@ from home.views import *
 # Create your views here.
 
 
-# basic_fields = {
-#                 'phone_number' : phone_number,
-#                 'first_name' : first_name,
-#                 'last_name' : last_name,
-#                 'password1' : password1,
-#                 'date_of_birth' : date_of_birth,
-#                 'thana_name' : thana_name,
-#                 'address' : address,
-#             }
-
 
 phone_number = ""
 first_name = ""
@@ -66,7 +56,7 @@ def register(request):
 
             count_cus = 0
             count_wor = 0
-
+            #TODO WORKER REGISTRATION
             for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'") :
                 count_cus += 1
 
@@ -137,6 +127,8 @@ def registerElectrician(request):
                 qualification = replaceNoneWithNull(qualification)
                 expertise = replaceNoneWithNull(expertise)
 
+                #TODO ELECTRICIAN REGISTRATION
+
                 print_all_sql("INSERT INTO ELECTRICIAN(WORKER_ID,LICENSE_INFO,YEARS_OF_EXPERIENCE,QUALIFICATION)"
                     + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + str(
                     yr_of_experience) + "','" + qualification + "')")
@@ -184,6 +176,8 @@ def registerHomeCleaner(request):
 
                 worker_id = request.session['user_id']
 
+                # TODO HOME CLEANER REGISTRATION
+
                 print_all_sql("INSERT INTO HOME_CLEANER(WORKER_ID,NID )"
                     + " VALUES ('" + str(worker_id) + "','" + str(NID_number) + "')")
 
@@ -226,6 +220,8 @@ def registerPestControlService(request):
 
                 worker_id = request.session['user_id']
 
+                # TODO PEST CONTROL REGISTRATION
+
                 print_all_sql("INSERT INTO PEST_CONTROL(WORKER_ID,LICENSE_INFO,CHEMICAL_INFO )"
                     + " VALUES ('" + str(worker_id) + "','" + license_info + "','" + chemical_info + "')")
 
@@ -266,6 +262,7 @@ def registerPlumber(request):
 
                 worker_id = request.session['user_id']
 
+                # TODO PLUMBER REGISTRATION
 
                 print_all_sql("INSERT INTO PLUMBER(WORKER_ID, YEARS_OF_EXPERIENCE )"
                     + " VALUES ('" + str(worker_id) + "','" + str(
@@ -314,6 +311,7 @@ def registerNurse(request):
 
                 worker_id = request.session['user_id']
 
+                # TODO NURSE REGISTRATION
 
                 print_all_sql("INSERT INTO NURSE(WORKER_ID, CERTIFICATE_INFO, QUALIFICATION, YEARS_OF_EXPERIENCE )"
                     + " VALUES ('" + str(worker_id) + "','" + certificate_info + "','" + qualification + "','" + str(
@@ -360,6 +358,8 @@ def registerHouseShiftingAssistant(request):
 
                 worker_id = request.session['user_id']
 
+                # TODO HOUSE SHIFTING ASSISTANT REGISTRATION
+
                 print_all_sql("INSERT INTO HOUSE_SHIFTING_ASSISTANT(WORKER_ID, DRIVING_LICENSE, CAR_TYPE, CAR_NO )"
                     + " VALUES ('" + str(worker_id) + "','" + driving_license + "','" + car_type + "','" + car_no + "')")
 
@@ -401,6 +401,8 @@ def registerCarpenter(request):
                 shop_address = replaceNoneWithNull(shop_address)
 
                 worker_id = request.session['user_id']
+
+                #TODO CARPENTER REGISTRATION
 
                 print_all_sql("INSERT INTO CARPENTER(WORKER_ID,SHOP_NAME, SHOP_ADDRESS )"
                     + " VALUES ('" + str(worker_id) + "','" + shop_name + "','" + shop_address + "')")

@@ -19,7 +19,7 @@ def home(request):
             # print_all_sql(request.session['user_id'])
             if 'user_type' in request.session and request.session['user_type'] == "customer" :
                 return redirect('home_customer-home')
-
+            # TODO HOME-WORKER WELCOME
             print_all_sql("SELECT FIRST_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID = " + str(request.session['user_id']))
 
             for row in cursor.execute("SELECT FIRST_NAME FROM SERVICE_PROVIDER WHERE WORKER_ID = " + str(request.session['user_id']) ):
@@ -33,7 +33,7 @@ def profile(request):
     if 'loggedIn' in request.session and request.session['loggedIn']==True:
         if 'user_type' in request.session and request.session['user_type'] == "customer":
             return redirect('home_customer-profile')
-
+        # TODO WORKER PROFILE
         print_all_sql("SELECT FIRST_NAME || ' ' || LAST_NAME,TYPE,PHONE_NUMBER,TO_CHAR(DATE_OF_BIRTH,'DL'),THANA_NAME,RATING,RATED_BY FROM SERVICE_PROVIDER WHERE WORKER_ID = " + str(request.session['user_id']))
 
         for row in cursor.execute(
@@ -125,7 +125,9 @@ def orders(request):
                 worker_type = row[0]
 
             print(worker_type)
-            #group table
+
+            #TODO HOME-WORKER CURRENT AVAIALBLE JOB REQUESTS
+
             if worker_type == 'Electrician' :
                 sql = """SELECT c.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,c.PHONE_NUMBER,c.ADDRESS,NVL(c.RATING,0),a.DESCRIPTION,a.REQ_TIME, TIMEDIFF2( SYSTIMESTAMP, a.REQ_TIME, 'HR'),TIMEDIFF2(SYSTIMESTAMP, a.REQ_TIME, 'min') , a.REQUEST_NO
                 FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a
@@ -173,7 +175,7 @@ def orders(request):
                 else :
                     data_dict['request_time'] = str(request_time_min) + " minute(s) ago"
                 data.append(data_dict)
-
+            # TODO HOME-WORKER CURRENT AVAIALBLE JOB REQUESTS - CHECK GROUP ALLOWED
             group_is_allowed_for_this_user = connection.cursor().callfunc("CHECK_IF_GROUP_ALLOWED", bool, [worker_id])
             if group_is_allowed_for_this_user == True :
                 availableRequestTable = CurrentlyAvailableRequestsWithGroup(data)
@@ -184,6 +186,7 @@ def orders(request):
             if len(data) == 0 :
                 empty = True
 
+            # TODO HOME-WORKER GROUP FORMATION REQUESTS
             print_all_sql("""
             SELECT s.FIRST_NAME || ' ' || s.LAST_NAME AS NAME, c.FIRST_NAME || ' ' ||c.LAST_NAME AS CUSTOMER_NAME, c.PHONE_NUMBER, c.ADDRESS AS CUSTOMER_ADDRESS, a.DESCRIPTION, gf.ORDER_ID
             FROM CUSTOMER c, SERVICE_PROVIDER s,SERVICE_REQUEST a, GROUP_FORM gf
@@ -233,8 +236,7 @@ def acceptRequest(request, req_no):
         if 'user_id' in request.session and request.session['user_id'] != -1:
             worker_id = request.session['user_id']
 
-
-
+        # TODO HOME-WORKER ACCEPT JOB REQUEST BUTTON
         print_all_sql("""INSERT INTO ORDER_INFO(TYPE, WORKER_ID,REQUEST_NO)
                                 VALUES( (SELECT TYPE
                                 FROM SERVICE_PROVIDER
@@ -248,7 +250,7 @@ def acceptRequest(request, req_no):
                                 WHERE WORKER_ID =""" + str(worker_id) + """),""" + str(worker_id) +""",""" + str(req_no) +  """);"""
                             )
 
-
+        # TODO HOME-WORKER INSERT ORDER ID IN SERVICE REQUEST TABLE
         print_all_sql("""UPDATE SERVICE_REQUEST
                 SET ORDER_ID = (SELECT ORDER_ID
                 FROM ORDER_INFO
@@ -278,7 +280,7 @@ def acceptRequestAndGroup(request, req_no):
 
         # print_all_sql("Worker_ID = ", worker_id)
 
-
+        # TODO HOME-WORKER ACCEPT AND ASK FOR GROUP BUTTON
         print_all_sql("""INSERT INTO ORDER_INFO(TYPE, WORKER_ID,REQUEST_NO)
                                 VALUES( (SELECT TYPE
                                 FROM SERVICE_PROVIDER
@@ -308,6 +310,7 @@ def acceptRequestAndGroup(request, req_no):
                 WHERE REQUEST_NO = """ + str(req_no) + """;"""
         )
 
+        # TODO HOME-WORKER CREATE GROUP REQUEST PROCEDURE
 
         connection.cursor().execute(""" 
         BEGIN
@@ -315,7 +318,7 @@ def acceptRequestAndGroup(request, req_no):
         END;
         """)
 
-
+        # insert the order id,team leader id into group form
         connection.cursor().execute(""" INSERT INTO GROUP_FORM(ORDER_ID, GROUP_SIZE, TEAM_LEADER_ID)
         VALUES( (SELECT ORDER_ID FROM ORDER_INFO WHERE REQUEST_NO = """ + str(req_no) + """ ), 0, """ + str(worker_id) + """);""")
 
@@ -372,7 +375,7 @@ def OrderHistory(request):
         if 'user_id' in request.session and request.session['user_id'] != -1:
             worker_id = request.session['user_id']
 
-
+            # TODO WORKER JOB HISTORY
             print_all_sql("""
                 SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME,ROUND((s.PAYMENT_PER_HOUR*TIMEDIFF2(O.END_TIME,O.START_TIME,'sec'))/3600,2)
                 FROM CUSTOMER C,ORDER_INFO O,SERVICE_PROVIDER S
@@ -412,6 +415,8 @@ def OrderHistory(request):
 
                 data_dict['Payment'] = row[6]
                 jobHistory.append(data_dict)
+
+            # TODO WORKER JOB HISTORY IF WORKED IN GROUP
 
             print_all_sql("""
             SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,OI.ORDER_ID,OI.START_TIME,OI.END_TIME,ROUND((s.PAYMENT_PER_HOUR*TIMEDIFF2(OI.END_TIME,OI.START_TIME,'sec'))/3600,2)
@@ -456,7 +461,7 @@ def OrderHistory(request):
 
 
 
-
+            # TODO WORKER CURRENTLY RUNNING JOBS
             print_all_sql("""SELECT C.FIRST_NAME || ' ' || C.LAST_NAME AS NAME,C.PHONE_NUMBER,C.ADDRESS,O.ORDER_ID,O.START_TIME,O.END_TIME
                             FROM CUSTOMER C,ORDER_INFO O
                             WHERE C.CUSTOMER_ID = ANY(SELECT SR.CUSTOMER_ID
@@ -514,6 +519,7 @@ def startTime(request,order_id) :
             return redirect('home_customer-home')
         # cur = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         #TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS')
+        # TODO WORKER START TIME BUTTON
 
         print_all_sql("""
         UPDATE ORDER_INFO
@@ -534,7 +540,7 @@ def endTime(request,order_id) :
             return redirect('home_customer-home')
         # cur = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         #TO_TIMESTAMP('" + str(cur) +"','YYYY-MM-DD HH24:MI:SS')
-
+        # TODO WORKER END TIME BUTTON
         print_all_sql("""
         UPDATE ORDER_INFO
         SET END_TIME = SYSTIMESTAMP
@@ -558,7 +564,7 @@ def acceptGroupRequest(request,order_id) :
         if 'user_id' in request.session and request.session['user_id'] != -1:
             worker_id = request.session['user_id']
 
-
+    # TODO WORKER ACCEPT GROUP REQUEST BUTTON
     connection.cursor().execute("""
     BEGIN
         ACCEPTING_GROUP_REQUEST(""" + str(order_id) + """,""" + str(worker_id) + """);

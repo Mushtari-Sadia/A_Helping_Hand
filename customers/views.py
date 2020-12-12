@@ -28,7 +28,7 @@ def register(request):
 
             count_cus = 0
             count_wor = 0
-
+            #TODO CUSTOMER REGISTRATION
             print_all_sql("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'")
 
             for row in conn.cursor().execute("SELECT * FROM CUSTOMER WHERE PHONE_NUMBER = '" + phone_number + "'"):

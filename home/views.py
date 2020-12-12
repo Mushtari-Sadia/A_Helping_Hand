@@ -42,6 +42,7 @@ def login(request):
                     id = row[0]
                     user_type = "customer"
                     #print_all_sql(customer_id)
+                    # TODO LOGIN
                 print_all_sql("SELECT CUSTOMER_ID FROM CUSTOMER WHERE PHONE_NUMBER='" + phone_number + "' AND PASSWORD='" + password + "'")
                 for row in conn.cursor().execute(
                         "SELECT WORKER_ID FROM SERVICE_PROVIDER WHERE PHONE_NUMBER='" + phone_number + "' AND PASSWORD='" + password + "'"):
